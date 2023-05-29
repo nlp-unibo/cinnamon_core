@@ -15,16 +15,16 @@ with requirements_path.open('r') as f:
     requirements = [req.split("\\")[0].split(":")[0].strip() for req in requirements]
 
 setup(
-    name='deasy_learning_core',
+    name='cinnamon_core',
     version='0.1',
     author='Federico Ruggeri',
     author_email='federico.ruggeri6@unibo.it',
     description='[Core Package] A simple high-level framework for research',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/federicoruggeri/deasy-learning',
+    url='https://github.com/federicoruggeri/cinnamore_core',
     project_urls={
-        'Bug Tracker': "https://github.com/federicoruggeri/deasy-learning/issues"
+        'Bug Tracker': "https://github.com/federicoruggeri/cinnamore_core/issues"
     },
     classifiers=[
         "Programming Language :: Python :: 3",

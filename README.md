@@ -1,5 +1,5 @@
-# (D)iverse Easy Learning: deasy-learning
+# Cinnamon (Core Package)
 
-A simple programming framework for machine learning and deep learning based research
+A simple Python library for general purpose configuration and code logic de-coupling.
 
-TODO
+## TODO
