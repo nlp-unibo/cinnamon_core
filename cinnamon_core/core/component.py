@@ -32,6 +32,7 @@ class Component:
             config: the ``Configuration`` instance bound to this ``Component``.
             post_build: if True, ``Configuration.post_build()`` method is invoked along with corresponding conditions
             evaluation.
+            serialization_id: The unique identifier for serialization. It is used to distinguish components when nested.
         """
 
         self.config = config
@@ -160,6 +161,25 @@ class Component:
             register_built_component: bool = False,
             build_args: Optional[Dict] = None
     ) -> C:
+        """
+        Syntactic sugar for building a ``Component`` from a ``RegistrationKey``.
+
+        Args:
+            config_registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
+            register_built_component: if True, it automatically registers the built ``Component`` in the registry.
+            build_args
+
+        Returns:
+            The built ``Component`` instance
+
+        Raises:
+            ``InvalidConfigurationTypeException``: if there's a mismatch between the ``Configuration`` class used
+            during registration and the type of the built ``Configuration`` instance using the registered
+            ``constructor`` method (see ``ConfigurationInfo`` arguments).
+
+            ``NotBoundException``: if the ``Configuration`` is not bound to any ``Component``.
+        """
+
         component = core.registry.Registry.build_component_from_key(
             config_registration_key=config_registration_key,
             register_built_component=register_built_component,
@@ -177,6 +197,27 @@ class Component:
             register_built_component: bool = False,
             build_args: Optional[Dict] = None
     ) -> C:
+        """
+        Syntactic sugar for building a ``Component`` from a ``RegistrationKey`` in implicit format.
+
+        Args:
+            name: the ``name`` field of ``RegistrationKey``
+            tags: the ``tags`` field of ``RegistrationKey``
+            namespace: the ``namespace`` field of ``RegistrationKey``
+            register_built_component: if True, it automatically registers the built ``Component`` in the registry.
+            build_args
+
+        Returns:
+            The built ``Component`` instance
+
+        Raises:
+            ``InvalidConfigurationTypeException``: if there's a mismatch between the ``Configuration`` class used
+            during registration and the type of the built ``Configuration`` instance using the registered
+            ``constructor`` method (see ``ConfigurationInfo`` arguments).
+
+            ``NotBoundException``: if the ``Configuration`` is not bound to any ``Component``.
+        """
+
         component = core.registry.Registry.build_component(
             name=name,
             tags=tags,
@@ -193,6 +234,17 @@ class Component:
             cls: Type[C],
             config_registration_key: core.registry.Registration
     ) -> C:
+        """
+        Syntactic sugar for retrieving a built ``Component`` instance from its corresponding ``Configuration``
+         ``RegistrationKey``.
+
+        Args:
+            config_registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
+
+        Returns:
+            The built ``Component`` instance
+        """
+
         component = core.registry.Registry.retrieve_built_component_from_key(
             config_registration_key=config_registration_key)
         check_type('component', component, cls)
@@ -207,6 +259,20 @@ class Component:
             tags: core.registry.Tag = None,
             is_default: bool = False
     ) -> C:
+        """
+        Syntactic sugar for retrieving a built ``Component`` instance from its corresponding ``Configuration``
+         ``RegistrationKey`` in implicit format.
+
+        Args:
+            name: the ``name`` field of ``RegistrationKey``
+            tags: the ``tags`` field of ``RegistrationKey``
+            namespace: the ``namespace`` field of ``RegistrationKey``
+            is_default: if True, the tag ``default`` is added to ``tags``
+
+        Returns:
+            The built ``Component`` instance
+        """
+
         component = core.registry.Registry.retrieve_built_component(name=name,
                                                                     tags=tags,
                                                                     namespace=namespace,
@@ -216,4 +282,4 @@ class Component:
         return component
 
 
-__all__ = ['Component']
+__all__ = ['Component', 'C']

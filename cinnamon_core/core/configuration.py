@@ -232,7 +232,8 @@ class Configuration(DotMap):
             self,
     ) -> List[Dict[str, Any]]:
         """
-        Gets all possible ``Configuration`` variant combinations of current ``Configuration`` instance based on specified variants.
+        Gets all possible ``Configuration`` variant combinations of current ``Configuration``
+        instance based on specified variants.
         There exist two different methods to specify variants
         - ``Parameter``-based: via ``variants`` field of ``Parameter``
         - ``Configuration``-based: via ``@supports_variants`` and ``@add_variant`` decorators
@@ -352,6 +353,9 @@ class Configuration(DotMap):
         """
         Checks for parameters that are a ``RegistrationKey`` and calls the ``Registry`` to build the
         bounded ``Component`` instance.
+
+        Args:
+            serialization_id: The ``Component`` unique identifier for serialization.
         """
         serialization_id = serialization_id if serialization_id is not None else 0
 
@@ -464,4 +468,4 @@ class Configuration(DotMap):
         logging_utility.logger.info(parameters_repr)
 
 
-__all__ = ['add_variant', 'supports_variants', 'Configuration', 'ValidationFailureException']
+__all__ = ['add_variant', 'supports_variants', 'Configuration', 'ValidationFailureException', 'C']
