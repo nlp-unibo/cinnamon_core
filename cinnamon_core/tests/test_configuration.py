@@ -3,10 +3,10 @@ from typing import List
 
 import pytest
 
-from core.component import Component
-from core.configuration import Configuration, ValidationFailureException
-from core.data import OutOfRangeParameterValueException
-from core.registry import RegistrationKey, Registry
+from cinnamon_core.core.component import Component
+from cinnamon_core.core.configuration import Configuration, ValidationFailureException
+from cinnamon_core.core.data import OutOfRangeParameterValueException
+from cinnamon_core.core.registry import RegistrationKey, Registry
 
 
 @pytest.fixture

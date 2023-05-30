@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from core.data import FieldDict, Field, ValidationFailureException
+from cinnamon_core.core.data import FieldDict, Field, ValidationFailureException
 
 
 def test_adding_field():

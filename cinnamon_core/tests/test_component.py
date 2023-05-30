@@ -1,8 +1,8 @@
 import pytest
 
-from core.component import Component
-from core.configuration import Configuration
-from core.registry import Registry
+from cinnamon_core.core.component import Component
+from cinnamon_core.core.configuration import Configuration
+from cinnamon_core.core.registry import Registry
 
 
 @pytest.fixture

@@ -6,9 +6,9 @@ from typing import AnyStr, Any, Iterable, Optional, Dict, Union, TypeVar, Type, 
 from dotmap import DotMap
 from typeguard import check_type
 
-import core
-from core.configuration import Configuration
-from utility.pickle_utility import save_pickle, load_pickle
+from cinnamon_core import core
+from cinnamon_core.core.configuration import Configuration
+from cinnamon_core.utility.pickle_utility import save_pickle, load_pickle
 
 C = TypeVar('C', bound='Component')
 

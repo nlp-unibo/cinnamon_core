@@ -4,9 +4,9 @@ from itertools import product
 
 import pytest
 
-from core.component import Component
-from core.configuration import Configuration, add_variant, supports_variants
-from core.registry import RegistrationKey, Registry
+from cinnamon_core.core.component import Component
+from cinnamon_core.core.configuration import Configuration, add_variant, supports_variants
+from cinnamon_core.core.registry import RegistrationKey, Registry
 
 
 @supports_variants

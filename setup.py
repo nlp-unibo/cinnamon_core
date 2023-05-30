@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 readme_path = Path(__file__).absolute().parent.joinpath('README.md')
 
@@ -31,7 +31,7 @@ setup(
         "Operating System :: OS Independent"
     ],
     license='MIT',
-    packages=find_packages(include=['core.*', 'utility.*']),
+    packages=['cinnamon_core', 'cinnamon_core.core', 'cinnamon_core.utility'],
     install_requires=requirements,
     python_requires=">=3.6"
 )

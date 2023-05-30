@@ -9,10 +9,10 @@ from typing import Dict, Any, Callable, Optional, Tuple, TypeVar, Hashable, Unio
 from dotmap import DotMap
 from typeguard import check_type
 
-import core
-from core.data import Parameter, ValidationResult, ValidationFailureException
-from utility import logging_utility
-from utility.python_utility import get_dict_values_combinations
+from cinnamon_core import core
+from cinnamon_core.core.data import Parameter, ValidationResult, ValidationFailureException
+from cinnamon_core.utility import logging_utility
+from cinnamon_core.utility.python_utility import get_dict_values_combinations
 
 C = TypeVar('C', bound='Configuration')
 Constructor = Callable[[Any], C]

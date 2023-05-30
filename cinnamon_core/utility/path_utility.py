@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 from typing import AnyStr, Union
 
-from utility.logging_utility import logger
+from cinnamon_core.utility.logging_utility import logger
 
 
 def clear_folder(

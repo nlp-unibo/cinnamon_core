@@ -10,9 +10,9 @@ from typing import Type, AnyStr, List, Set, Dict, Any, Union, Optional, Callable
 
 from typeguard import check_type
 
-from core.component import Component
-from core.configuration import Configuration
-from utility import logging_utility
+from cinnamon_core.core.component import Component
+from cinnamon_core.core.configuration import Configuration
+from cinnamon_core.utility import logging_utility
 
 Tag = Optional[Set[str]]
 Constructor = Callable[[Any], Configuration]
