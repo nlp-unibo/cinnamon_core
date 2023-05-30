@@ -1,7 +1,7 @@
-deasy_learning_core
+cinnamon_core
 ===================
 
 .. toctree::
    :maxdepth: 4
 
-   deasy_learning_core
+   cinnamon_core

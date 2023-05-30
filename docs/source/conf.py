@@ -7,13 +7,13 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, Path(__file__).absolute().parent.parent.parent.parent.as_posix())
 sys.path.insert(0, Path(__file__).absolute().parent.parent.parent.as_posix())
+sys.path.insert(0, Path(__file__).absolute().parent.parent.as_posix())
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'deasy-learning-core'
+project = 'cinnamon-core'
 copyright = '2023, Federico Ruggeri'
 author = 'Federico Ruggeri'
 release = '0.1'
@@ -24,8 +24,11 @@ release = '0.1'
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
+    'sphinx.ext.githubpages',
     'sphinx_autodoc_typehints'
 ]
+
+autodoc_mock_imports = ["missing_package"]
 
 # Napoleon settings
 napoleon_google_docstring = True
