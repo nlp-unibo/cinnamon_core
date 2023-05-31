@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from cinnamon_core.core.component import Component
@@ -180,3 +182,13 @@ def test_register_built_component_exception(
     with pytest.raises(NotRegisteredException):
         Registry.register_built_component_from_key(config_registration_key=key,
                                                    component=component)
+
+
+def test_retrieve_external_configurations(
+        reset_registry
+):
+    external_path = Path().absolute().parent.parent.joinpath('tests', 'external_test_repo')
+    Registry.load_registrations(directory_path=external_path)
+    component = Registry.build_component(name='test',
+                                         namespace='external')
+    assert isinstance(component, Component)

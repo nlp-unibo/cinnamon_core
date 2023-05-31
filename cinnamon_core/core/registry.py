@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import pkgutil
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
@@ -255,9 +256,9 @@ class ConfigurationInfo:
 
 
 _DEFAULT_REGISTRY_PACKAGES = {
-    'generic': 'deasy_learning_generic',
-    'tf': 'deasy_learning_tf',
-    'torch': 'deasy_learning_torch',
+    'generic': 'cinnamon_generic',
+    'tf': 'cinnamon_tf',
+    'torch': 'cinnamon_th',
 }
 
 
@@ -290,8 +291,8 @@ class Registry:
     REGISTRATION_METHODS: List = []
 
     @staticmethod
-    def load_custom_module(
-            module_path: Union[AnyStr, Path],
+    def load_registrations(
+            directory_path: Union[AnyStr, Path],
     ):
         """
         Imports a Python's module for registration.
@@ -300,20 +301,33 @@ class Registry:
         to issue registrations.
 
         Args:
-            module_path: path of the module
+            directory_path: path of the module
         """
 
-        module_path = Path(module_path) if type(module_path) != Path else module_path
-        module_name = module_path.name
-        module_path = module_path.joinpath('__init__.py')
+        directory_path = Path(directory_path) if type(directory_path) != Path else directory_path
 
-        if not module_path.is_file():
+        if not directory_path.exists() or not directory_path.is_dir():
             return
 
-        spec = importlib.util.spec_from_file_location(name=module_name,
-                                                      location=module_path)
+        for config_folder in directory_path.rglob('configurations'):
+            for python_script in config_folder.glob('*.py'):
+                spec = importlib.util.spec_from_file_location(name=config_folder.name,
+                                                              location=config_folder.joinpath(python_script))
+                if spec is not None:
+                    Registry.import_and_load_registrations(spec=spec)
+
+    @staticmethod
+    def import_and_load_registrations(
+            spec
+    ):
+        # TODO: a bit of a hack -> should we mark registered methods to avoid re-executions?
+        previous_methods_size = len(Registry.REGISTRATION_METHODS)
         module = importlib.util.module_from_spec(spec=spec)
-        Registry.import_and_load_regitrations(package=module)
+        spec.loader.exec_module(module)
+        new_methods_size = len(Registry.REGISTRATION_METHODS)
+        if new_methods_size > previous_methods_size:
+            for method in Registry.REGISTRATION_METHODS[previous_methods_size:]:
+                method()
 
     @staticmethod
     def is_custom_module(
@@ -335,16 +349,15 @@ class Registry:
         """
         if isinstance(package, str):
             package = importlib.import_module(package)
-        # TODO: low maintainability
+            sys.path.append(package.__path__[0])
         for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
-            if name not in ['setup']:
-                full_name = package.__name__ + '.' + name
-                try:
-                    importlib.import_module(full_name)
-                except ModuleNotFoundError:
-                    continue
-                if recursive and is_pkg:
-                    Registry.import_submodules(full_name)
+            full_name = package.__name__ + '.' + name
+            try:
+                importlib.import_module(full_name)
+            except ModuleNotFoundError:
+                continue
+            if recursive and is_pkg:
+                Registry.import_submodules(full_name)
 
     @staticmethod
     def try_resolve_module_from_namespace(
@@ -355,19 +368,8 @@ class Registry:
 
         if namespace in _DEFAULT_REGISTRY_PACKAGES:
             module_name = _DEFAULT_REGISTRY_PACKAGES[namespace]
-            Registry.import_and_load_regitrations(package=module_name)
-
-    @staticmethod
-    def import_and_load_regitrations(
-            package: Union[str, ModuleType]
-    ):
-        # TODO: a bit of a hack -> should we mark registered methods to avoid re-executions?
-        previous_methods_size = len(Registry.REGISTRATION_METHODS)
-        Registry.import_submodules(package=package)
-        new_methods_size = len(Registry.REGISTRATION_METHODS)
-        if new_methods_size > previous_methods_size:
-            for method in Registry.REGISTRATION_METHODS[previous_methods_size:]:
-                method()
+            module = importlib.import_module(module_name)
+            Registry.load_registrations(directory_path=module.__path__[0])
 
     @staticmethod
     def is_in_registry(

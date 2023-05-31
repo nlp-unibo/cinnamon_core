@@ -51,8 +51,18 @@ def get_function_arguments():
 def get_function_signature(
         function
 ):
+    """
+    Returns the static signature of a method.
+
+    Args:
+        function: the method from which to get its signature
+
+    Returns:
+        The argument names that define the input method signature
+    """
+
     arguments = inspect.signature(function)
     return arguments.parameters.keys()
 
 
-__all__ = ['get_dict_values_combinations', 'get_function_arguments']
+__all__ = ['get_dict_values_combinations', 'get_function_arguments', 'get_function_signature']
