@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import ast
 import importlib.util
-import pkgutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from types import ModuleType
 from typing import Type, AnyStr, List, Set, Dict, Any, Union, Optional, Callable
 
 from typeguard import check_type
@@ -255,10 +253,11 @@ class ConfigurationInfo:
     kwargs: Any
 
 
-_DEFAULT_REGISTRY_PACKAGES = {
+# TODO: to be updated
+_DEFAULT_PACKAGES = {
     'generic': 'cinnamon_generic',
     'tf': 'cinnamon_tf',
-    'torch': 'cinnamon_th',
+    'th': 'cinnamon_th'
 }
 
 
@@ -266,7 +265,10 @@ def register(
         func: Callable
 ) -> Callable:
     # call the function to execute registrations
-    if func not in Registry.REGISTRATION_METHODS:
+    if Registry.REGISTER_SCOPE is None:
+        return func
+
+    if func not in Registry.REGISTRATION_METHODS and func.__module__ == Registry.REGISTER_SCOPE.name:
         Registry.REGISTRATION_METHODS.append(func)
     return func
 
@@ -289,6 +291,8 @@ class Registry:
     BINDINGS: Dict = {}
     BUILT_MAPPINGS: Dict = {}
     REGISTRATION_METHODS: List = []
+    MODULE_SCOPE: AnyStr = None
+    REGISTER_SCOPE: AnyStr = None
 
     @staticmethod
     def load_registrations(
@@ -311,10 +315,12 @@ class Registry:
 
         for config_folder in directory_path.rglob('configurations'):
             for python_script in config_folder.glob('*.py'):
-                spec = importlib.util.spec_from_file_location(name=config_folder.name,
-                                                              location=config_folder.joinpath(python_script))
+                spec = importlib.util.spec_from_file_location(name=python_script.name,
+                                                              location=python_script)
                 if spec is not None:
+                    Registry.REGISTER_SCOPE = python_script
                     Registry.import_and_load_registrations(spec=spec)
+                    Registry.REGISTER_SCOPE = None
 
     @staticmethod
     def import_and_load_registrations(
@@ -333,31 +339,7 @@ class Registry:
     def is_custom_module(
             module_path: Union[AnyStr, Path]
     ) -> bool:
-        return module_path not in _DEFAULT_REGISTRY_PACKAGES
-
-    @staticmethod
-    def import_submodules(
-            package: Union[str, ModuleType],
-            recursive: bool = True
-    ):
-        """
-        Import all submodules of a module, recursively, including subpackages
-
-        Args:
-            package: package (name or actual module)
-            recursive: if True, the ``import_submodules`` function is invoked for found submodules
-        """
-        if isinstance(package, str):
-            package = importlib.import_module(package)
-            sys.path.append(package.__path__[0])
-        for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
-            full_name = package.__name__ + '.' + name
-            try:
-                importlib.import_module(full_name)
-            except ModuleNotFoundError:
-                continue
-            if recursive and is_pkg:
-                Registry.import_submodules(full_name)
+        return module_path.name not in sys.modules
 
     @staticmethod
     def try_resolve_module_from_namespace(
@@ -366,10 +348,13 @@ class Registry:
         if namespace is None:
             return None
 
-        if namespace in _DEFAULT_REGISTRY_PACKAGES:
-            module_name = _DEFAULT_REGISTRY_PACKAGES[namespace]
-            module = importlib.import_module(module_name)
-            Registry.load_registrations(directory_path=module.__path__[0])
+        if namespace in _DEFAULT_PACKAGES:
+            module_name = _DEFAULT_PACKAGES[namespace]
+            if Registry.MODULE_SCOPE is None or Registry.MODULE_SCOPE != module_name:
+                Registry.MODULE_SCOPE = module_name
+                module = importlib.import_module(module_name)
+                Registry.load_registrations(directory_path=module.__path__[0])
+                Registry.MODULE_SCOPE = None
 
     @staticmethod
     def is_in_registry(

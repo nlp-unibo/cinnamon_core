@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import AnyStr, Any, Union
 
-import dill
+import cloudpickle as pickle
 
 
 def load_pickle(
@@ -19,7 +19,7 @@ def load_pickle(
 
     filepath = Path(filepath) if type(filepath) != Path else filepath
     with filepath.open('rb') as f:
-        data = dill.load(f)
+        data = pickle.load(f)
     return data
 
 
@@ -37,7 +37,7 @@ def save_pickle(
 
     filepath = Path(filepath) if type(filepath) != Path else filepath
     with filepath.open('wb') as f:
-        dill.dump(data, f)
+        pickle.dump(data, f)
 
 
 __all__ = ['load_pickle', 'save_pickle']
