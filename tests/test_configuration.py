@@ -217,7 +217,7 @@ def test_get_delta_copy():
     assert config.x == 5
     assert type(delta_copy) == Configuration
 
-    other_copy: Configuration = delta_copy.get_delta_copy(params_dict={'x': 15})
+    other_copy: Configuration = delta_copy.get_delta_copy(params={'x': 15})
     assert other_copy.x == 15
     assert delta_copy.x == 10
     assert config.x == 5

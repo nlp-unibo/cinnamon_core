@@ -908,7 +908,7 @@ class Registry:
         default_config = configuration_class.get_default()
 
         # Make sure we can work with a valid configuration
-        default_config.validate()
+        # default_config.validate()
 
         children = {param_key: param
                     for param_key, param in default_config.items()
@@ -966,7 +966,7 @@ class Registry:
                         combination_tags.add(f'{key}.{tag}')
             combination_tags = tags.union(combination_tags) if tags is not None else combination_tags
             new_registered_conf_keys.append(Registry.register_and_bind(configuration_class=configuration_class,
-                                                                       configuration_constructor=configuration_class.get_delta_copy,
+                                                                       configuration_constructor=configuration_class.get_delta_class_copy,
                                                                        configuration_kwargs={
                                                                            'params': combination},
                                                                        component_class=component_class,

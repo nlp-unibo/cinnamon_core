@@ -138,7 +138,7 @@ class Component:
             A ``Component``'s delta copy based on specified new parameters' value.
         """
 
-        config_copy = self.config.get_delta_copy(params_dict=params_dict)
+        config_copy = self.config.get_delta_copy(params=params_dict)
         return type(self)(config=config_copy,
                           post_build=False)
 

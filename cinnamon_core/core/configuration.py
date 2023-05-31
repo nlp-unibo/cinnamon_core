@@ -248,7 +248,7 @@ class Configuration(DotMap):
             if param.variants is not None and len(param.variants):
                 parameters[param_key] = param.variants
         combinations = get_dict_values_combinations(params_dict=parameters)
-        return [comb for comb in combinations if self.get_delta_copy(params_dict=comb).validate(strict=False).passed]
+        return [comb for comb in combinations if self.get_delta_copy(params=comb).validate(strict=False).passed]
 
     def get_serialization_parameters(
             self
@@ -384,43 +384,43 @@ class Configuration(DotMap):
     @classmethod
     def get_delta_class_copy(
             cls: type[C],
-            params_dict: Dict[str, Any]
+            params: Dict[str, Any]
     ) -> C:
         """
         Gets a delta copy of the default ``Configuration``.
 
         Args:
-            params_dict: a dictionary with ``Parameter.name`` as keys and new ``Parameter.value`` as values.
+            params: a dictionary with ``Parameter.name`` as keys and new ``Parameter.value`` as values.
 
         Returns:
             A delta copy of the default ``Configuration`` as specified by ``Configuration.get_default()`` method.
         """
         config = cls.get_default()
-        return config.get_delta_copy(params_dict=params_dict)
+        return config.get_delta_copy(params=params)
 
     def get_delta_copy(
             self: type[C],
-            params_dict: Optional[Dict[str, Any]] = None
+            params: Optional[Dict[str, Any]] = None
     ) -> C:
         """
         Gets a delta copy of current ``Configuration``.
 
         Args:
-            params_dict: a dictionary with ``Parameter.name`` as keys and new ``Parameter.value`` as values.
+            params: a dictionary with ``Parameter.name`` as keys and new ``Parameter.value`` as values.
 
         Returns:
             A delta copy of current ``Configuration``.
         """
-        params_dict = params_dict if params_dict is not None else {}
+        params = params if params is not None else {}
 
         # we can't use deepcopy(self) as it will weak-copy parameters
-        copy_dict = deepcopy(params_dict)
+        copy_dict = deepcopy(params)
         copy = self.get_default()
         for param_key, param in self.items():
             copy.add(deepcopy(param))
 
         found_keys = []
-        for key, value in params_dict.items():
+        for key, value in params.items():
             if key in copy:
                 copy.get_param(key=key).value = deepcopy(value)
                 found_keys.append(key)
@@ -441,7 +441,7 @@ class Configuration(DotMap):
 
             # No valid case if child is a RegistrationKey -> we avoid an unnecessary registration
             if copy_dict and isinstance(child.value, core.component.Component):
-                copy.get_param(key=child_key).value.config = child.value.config.get_delta_copy(params_dict=copy_dict)
+                copy.get_param(key=child_key).value.config = child.value.config.get_delta_copy(params=copy_dict)
 
         return copy
 

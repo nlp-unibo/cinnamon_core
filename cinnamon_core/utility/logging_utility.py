@@ -99,11 +99,11 @@ def update_logger(
     set_logging_path(logging_path=logging_path)
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_handler = FileHandler(_logging_path)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-
-    logger.handlers[1] = file_handler
+    if _logging_path.parent.exists():
+        file_handler = FileHandler(_logging_path)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.handlers[1] = file_handler
 
 
 __all__ = [
