@@ -4,6 +4,7 @@ import ast
 import importlib.util
 import sys
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import Type, AnyStr, List, Set, Dict, Any, Union, Optional, Callable
 
@@ -291,6 +292,7 @@ class Registry:
     BINDINGS: Dict = {}
     BUILT_MAPPINGS: Dict = {}
     REGISTRATION_METHODS: List = []
+    VARIANTS_QUEUE = []
     MODULE_SCOPE: AnyStr = None
     REGISTER_SCOPE: AnyStr = None
 
@@ -859,14 +861,15 @@ class Registry:
         return config_regr_key
 
     @staticmethod
-    def register_and_bind_configuration_variants(
+    def _register_and_bind_configuration_variants(
             configuration_class: Type[Configuration],
             component_class: Type[Component],
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
             parameter_variants_only: bool = False,
-            allow_parameter_variants: bool = True
+            allow_parameter_variants: bool = True,
+            configuration_constructor: Callable[[], Configuration] = None
     ) -> Optional[List[RegistrationKey]]:
         """
         Registers and binds all possible ``Configuration`` variants.
@@ -883,14 +886,17 @@ class Registry:
             parameter_variants_only: if True, only parameter variants are considered.
             allow_parameter_variants: if True, the Registry looks for parameter variants iff
             no configuration variants have been detected. This functionality allows mixed nested configuration variants.
+            configuration_constructor: TODO
 
         Returns:
             the list of ``RegistrationKey`` used to register each ``Configuration`` variant
         """
 
         variants = configuration_class.variants
+        configuration_constructor = configuration_constructor \
+            if configuration_constructor is not None else configuration_class.get_default
 
-        if not parameter_variants_only:
+        if not parameter_variants_only and configuration_constructor == configuration_class.get_default:
             new_registered_conf_keys = []
             for variant in variants:
                 variant_tags = tags.union({variant.name}) if tags is not None else {variant.name}
@@ -905,10 +911,20 @@ class Registry:
             if len(variants) or not allow_parameter_variants:
                 return new_registered_conf_keys
 
-        default_config = configuration_class.get_default()
+        default_config = configuration_constructor()
+        is_variant = configuration_constructor != configuration_class.get_default
+        variant_name = None
+        if is_variant:
+            variant_name = [variant.name
+                            for variant in configuration_class.variants
+                            if variant.method.__name__ == configuration_constructor.__func__.__name__]
+            if len(variant_name) != 1:
+                raise RuntimeError(f'Expected to find a registered variant. Found {len(variant_name)}. '
+                                   f'Did you decorate the specified constructor with @add_variant?')
+            variant_name = variant_name[0]
 
         # Make sure we can work with a valid configuration
-        # default_config.validate()
+        default_config.validate()
 
         children = {param_key: param
                     for param_key, param in default_config.items()
@@ -920,10 +936,11 @@ class Registry:
                 child_regr_key = child.value
                 child_config_class = Registry.retrieve_configurations_from_key(config_registration_key=child_regr_key,
                                                                                exact_match=True).class_type
-                if not child_regr_key in Registry.BINDINGS:
+                if child_regr_key not in Registry.BINDINGS:
                     raise NotBoundException(registration_key=child_regr_key)
                 child_component_class = Registry.BINDINGS[child_regr_key]
-                child_variants = Registry.register_and_bind_configuration_variants(
+
+                child_variants = Registry._register_and_bind_configuration_variants(
                     configuration_class=child_config_class,
                     component_class=child_component_class,
                     name=child_regr_key.name,
@@ -939,9 +956,11 @@ class Registry:
         # No combinations have been found -> check if already registered
         if not len(parameter_combinations):
             retrieved_config = Registry.retrieve_configurations(name=name,
-                                                                tags=tags,
+                                                                tags=tags if not is_variant else tags.union(
+                                                                    {variant_name}),
                                                                 namespace=namespace,
-                                                                exact_match=True)
+                                                                exact_match=True,
+                                                                strict=False)
             if retrieved_config is not None:
                 return None
             else:
@@ -950,7 +969,7 @@ class Registry:
                                            configuration_constructor=configuration_class.get_default,
                                            component_class=component_class,
                                            name=name,
-                                           tags=tags,
+                                           tags=tags if not is_variant else tags.union({variant_name}),
                                            namespace=namespace)
                 return None
 
@@ -965,6 +984,7 @@ class Registry:
                     for tag in value.tags:
                         combination_tags.add(f'{key}.{tag}')
             combination_tags = tags.union(combination_tags) if tags is not None else combination_tags
+            combination_tags = combination_tags if not is_variant else combination_tags.union({variant_name})
             new_registered_conf_keys.append(Registry.register_and_bind(configuration_class=configuration_class,
                                                                        configuration_constructor=configuration_class.get_delta_class_copy,
                                                                        configuration_kwargs={
@@ -974,6 +994,32 @@ class Registry:
                                                                        tags=combination_tags,
                                                                        namespace=namespace))
         return new_registered_conf_keys
+
+    @staticmethod
+    def register_and_bind_configuration_variants(
+            configuration_class: Type[Configuration],
+            component_class: Type[Component],
+            name: str,
+            namespace: str = 'generic',
+            tags: Tag = None,
+            parameter_variants_only: bool = False,
+            allow_parameter_variants: bool = True,
+            configuration_constructor: Callable[[], Configuration] = None
+    ):
+        Registry.VARIANTS_QUEUE.append(partial(Registry._register_and_bind_configuration_variants,
+                                               configuration_class=configuration_class,
+                                               component_class=component_class,
+                                               name=name,
+                                               namespace=namespace,
+                                               tags=tags,
+                                               parameter_variants_only=parameter_variants_only,
+                                               allow_parameter_variants=allow_parameter_variants,
+                                               configuration_constructor=configuration_constructor))
+
+    @staticmethod
+    def register_and_bind_queued_variants():
+        for queued_method in Registry.VARIANTS_QUEUE:
+            queued_method()
 
 
 __all__ = [
