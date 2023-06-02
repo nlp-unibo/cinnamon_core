@@ -331,7 +331,7 @@ class FieldDict(DotMap):
         Returns:
             A dictionary with ``Field.name`` as keys and ``Field`` as values
         """
-        return {key: value for key, value in self.items() if key == name or name is None}
+        return {key: field.value for key, field in self.items() if key == name or name is None}
 
 
 class Parameter(Field):
@@ -385,7 +385,7 @@ class Parameter(Field):
             ``OutOfRangeParameterValueException``: if ``Parameter.value`` is not in the specified value range.
         """
 
-        if self.allowed_range is not None and not self.allowed_range(self.value):
+        if self.value is not None and self.allowed_range is not None and not self.allowed_range(self.value):
             raise OutOfRangeParameterValueException(value=self.value)
 
     def long_repr(

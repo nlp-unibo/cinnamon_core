@@ -384,18 +384,25 @@ class Configuration(DotMap):
     @classmethod
     def get_delta_class_copy(
             cls: type[C],
-            params: Dict[str, Any]
+            params: Dict[str, Any],
+            constructor: Optional[Callable[[Any], C]] = None,
+            constructor_kwargs: Optional[Dict] = None
     ) -> C:
         """
         Gets a delta copy of the default ``Configuration``.
 
         Args:
             params: a dictionary with ``Parameter.name`` as keys and new ``Parameter.value`` as values.
+            constructor: TODO
+            constructor_kwargs: TODO
 
         Returns:
             A delta copy of the default ``Configuration`` as specified by ``Configuration.get_default()`` method.
         """
-        config = cls.get_default()
+        constructor = constructor if constructor is not None else cls.get_default
+        constructor_kwargs = constructor_kwargs if constructor_kwargs is not None else {}
+
+        config = constructor(**constructor_kwargs)
         return config.get_delta_copy(params=params)
 
     def get_delta_copy(
@@ -456,6 +463,44 @@ class Configuration(DotMap):
             Configuration instance.
         """
         return cls()
+
+    def search_by_tag(
+            self,
+            tags: Optional[Union[Set[str], str]] = None,
+            exact_match: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Searches for all ``Parameter`` that match specified tags set.
+
+        Args:
+            tags: a set of string tags to look for
+            exact_match: if True, only the ``Parameter`` with ``Parameter.tags`` that exactly match ``tags`` will be returned
+
+        Returns:
+            A dictionary with ``Parameter.name`` as keys and ``Parameter`` as values
+        """
+        if not type(tags) == set:
+            tags = {tags}
+
+        exatch_match_condition = lambda field: exact_match and field.tags == tags
+        partial_match_condition = lambda field: not exact_match and field.tags.intersection(tags) == tags
+        return {key: param.value for key, param in self.items()
+                if exatch_match_condition(param) or partial_match_condition(param) or tags is None}
+
+    def search_by_name(
+            self,
+            name: Optional[Hashable] = None
+    ) -> Dict[str, Any]:
+        """
+        Searches for all ``Parameter`` that match the specified name.
+
+        Args:
+            name: unique identifier of the ``Parameter`` instance.
+
+        Returns:
+            A dictionary with ``Parameter.name`` as keys and ``Parameter`` as values
+        """
+        return {key: param.value for key, param in self.items() if key == name or name is None}
 
     def show(
             self
