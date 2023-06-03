@@ -4,13 +4,12 @@ import os
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import partial
-from typing import Dict, Any, Callable, Optional, Tuple, TypeVar, Hashable, Union, Type, Iterable, List, Set
+from typing import Dict, Any, Callable, Optional, Tuple, TypeVar, Hashable, Type, Iterable, List, Set
 
-from dotmap import DotMap
 from typeguard import check_type
 
 from cinnamon_core import core
-from cinnamon_core.core.data import Parameter, ValidationResult, ValidationFailureException
+from cinnamon_core.core.data import FieldDict, Parameter, ValidationResult, ValidationFailureException
 from cinnamon_core.utility import logging_utility
 from cinnamon_core.utility.python_utility import get_dict_values_combinations
 
@@ -85,7 +84,7 @@ def supports_variants(
 
 # TODO: re-integrate search APIs?
 @supports_variants
-class Configuration(DotMap):
+class Configuration(FieldDict):
     """
     Generic Configuration class.
     A Configuration specifies the parameters of a Component.
@@ -106,23 +105,8 @@ class Configuration(DotMap):
         else:
             if key not in self:
                 raise KeyError(f'Cannot update the value of a non-existing parameter! Key = {key}')
-            self.get_param(key).value = item
-        self.get_param(key).in_allowed_range()
-
-    def __getitem__(
-            self,
-            item: Union[Hashable, Tuple[Hashable, bool]]
-    ) -> Parameter:
-        return_value = True
-        if type(item) == tuple:
-            item, return_value = item
-        return super().__getitem__(item).value if return_value else super().__getitem__(item)
-
-    def get_param(
-            self,
-            key: Hashable
-    ) -> Parameter:
-        return self[key, False]
+            self.get(key).value = item
+        self.get(key).in_allowed_range()
 
     def add(
             self,
@@ -148,7 +132,7 @@ class Configuration(DotMap):
                 type_hint: Type
         ) -> bool:
             try:
-                found_param = parameters.get_param(key=param_name)
+                found_param = parameters.get(param_name)
                 check_type(argname=str(found_param.name),
                            value=found_param.value,
                            expected_type=type_hint)
@@ -176,7 +160,7 @@ class Configuration(DotMap):
         # However, variants space is usually small -> we might consider adding a pre-condition here
         if param.variants is not None:
             self.add_condition(name=f'{param.name}_valid_variants',
-                               condition=lambda p: len(p.get_param(param.name).variants) > 0)
+                               condition=lambda p: len(p.get(param.name).variants) > 0)
 
     def add_short(
             self,
@@ -360,7 +344,7 @@ class Configuration(DotMap):
         serialization_id = serialization_id if serialization_id is not None else 0
 
         for index in self.keys():
-            param = self.get_param(index)
+            param = self.get(index)
             if param.is_registration and param.build_from_registration and param.value is not None:
                 serialization_id += 1
                 if type(param.value) == core.registry.RegistrationKey:
@@ -420,16 +404,16 @@ class Configuration(DotMap):
         """
         params = params if params is not None else {}
 
-        # we can't use deepcopy(self) as it will weak-copy parameters
         copy_dict = deepcopy(params)
-        copy = self.get_default()
-        for param_key, param in self.items():
-            copy.add(deepcopy(param))
+        copy = deepcopy(self)
+        # copy = self.get_default()
+        # for param_key, param in self.items():
+        #     copy.add(deepcopy(param))
 
         found_keys = []
         for key, value in params.items():
             if key in copy:
-                copy.get_param(key=key).value = deepcopy(value)
+                copy.get(key).value = deepcopy(value)
                 found_keys.append(key)
 
         # Remove found keys
@@ -448,13 +432,13 @@ class Configuration(DotMap):
 
             # No valid case if child is a RegistrationKey -> we avoid an unnecessary registration
             if copy_dict and isinstance(child.value, core.component.Component):
-                copy.get_param(key=child_key).value.config = child.value.config.get_delta_copy(params=copy_dict)
+                copy.get(child_key).value.config = child.value.config.get_delta_copy(params=copy_dict)
 
         return copy
 
     @classmethod
     def get_default(
-            cls: type[C]
+            cls: Type[C]
     ) -> C:
         """
         Returns the default Configuration instance.
@@ -463,44 +447,6 @@ class Configuration(DotMap):
             Configuration instance.
         """
         return cls()
-
-    def search_by_tag(
-            self,
-            tags: Optional[Union[Set[str], str]] = None,
-            exact_match: bool = True
-    ) -> Dict[str, Any]:
-        """
-        Searches for all ``Parameter`` that match specified tags set.
-
-        Args:
-            tags: a set of string tags to look for
-            exact_match: if True, only the ``Parameter`` with ``Parameter.tags`` that exactly match ``tags`` will be returned
-
-        Returns:
-            A dictionary with ``Parameter.name`` as keys and ``Parameter`` as values
-        """
-        if not type(tags) == set:
-            tags = {tags}
-
-        exatch_match_condition = lambda field: exact_match and field.tags == tags
-        partial_match_condition = lambda field: not exact_match and field.tags.intersection(tags) == tags
-        return {key: param.value for key, param in self.items()
-                if exatch_match_condition(param) or partial_match_condition(param) or tags is None}
-
-    def search_by_name(
-            self,
-            name: Optional[Hashable] = None
-    ) -> Dict[str, Any]:
-        """
-        Searches for all ``Parameter`` that match the specified name.
-
-        Args:
-            name: unique identifier of the ``Parameter`` instance.
-
-        Returns:
-            A dictionary with ``Parameter.name`` as keys and ``Parameter`` as values
-        """
-        return {key: param.value for key, param in self.items() if key == name or name is None}
 
     def show(
             self

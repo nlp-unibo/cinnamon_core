@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Any, Optional, Callable, Dict, Type, Set, Union, Iterable, Tuple, Hashable, TypeVar
 
-from dotmap import DotMap
 from typeguard import check_type
 
 F = TypeVar('F', bound='Field')
@@ -128,14 +127,52 @@ class Field:
         return name_condition(other) and value_condition(other)
 
 
-class FieldDict(DotMap):
+class FieldDict(dict):
     """
-    A Python dictionary extension (see ``DotMap``) whose values are ``Field`` instances.
+    A Python dictionary extension whose values are ``Field`` instances.
     The ``Field.name`` attribute is used as key.
     """
 
-    def __len__(self):
-        return len(self.items())
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ):
+        super(FieldDict, self).__init__(*args, **kwargs)
+        for arg in args:
+            if isinstance(arg, dict):
+                for k, v in arg.items():
+                    self.add_short(name=k, value=v, type_hint=type(v))
+
+        if kwargs:
+            for k, v in kwargs.items():
+                self.add_short(name=k, value=v, type_hint=type(v))
+
+    def __getattr__(
+            self,
+            item
+    ):
+        return self.get(item).value
+
+    def __setattr__(
+            self,
+            key,
+            value
+    ):
+        self.__setitem__(key, value)
+
+    def __delattr__(
+            self,
+            item
+    ):
+        self.__delitem__(item)
+
+    def __delitem__(
+            self,
+            key
+    ):
+        super().__delitem__(key)
+        del self.__dict__[key]
 
     def __setitem__(
             self,
@@ -143,15 +180,15 @@ class FieldDict(DotMap):
             item: Union[Field, Any]
     ):
         if isinstance(item, Field):
-            super().__setitem__(k=key, v=item)
+            super().__setitem__(key, item)
         else:
             assert key in self, f'Cannot find or update a non-existing field! Key = {key}'
-            self.get_field(key).value = item
+            self.get(key).value = item
 
     def __getitem__(
             self,
             item: Union[Hashable, Tuple[Hashable, bool]]
-    ) -> Field:
+    ) -> F:
         return_value = True
         if type(item) == tuple:
             item, return_value = item
@@ -160,22 +197,6 @@ class FieldDict(DotMap):
             return super().__getitem__(item)
 
         return super().__getitem__(item).value if return_value else super().__getitem__(item)
-
-    def get_field(
-            self,
-            key: Hashable,
-            default_value: Optional[Any] = None
-    ) -> Union[Field, Optional[Any]]:
-        return self[key, False] if key in self else default_value
-
-    def __deepcopy__(
-            self,
-            memodict: Dict = None
-    ):
-        copy = type(self)()
-        for index in self.keys():
-            copy.add(deepcopy(self.get_field(index)))
-        return copy
 
     def add(
             self,
@@ -195,7 +216,7 @@ class FieldDict(DotMap):
                 type_hint: Type
         ) -> bool:
             try:
-                found_param = fields.get_field(key=field_name)
+                found_param = fields.get(field_name)
                 check_type(argname=str(found_param.name),
                            value=found_param.value,
                            expected_type=type_hint)

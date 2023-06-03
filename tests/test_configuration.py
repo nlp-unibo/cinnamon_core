@@ -22,12 +22,12 @@ def define_configuration():
 def test_define_configuration(define_configuration):
     config = define_configuration
     assert config.x == 10
-    assert config.get_param(key='x').value == 10
-    assert config.get_param(key='x').name == 'x'
+    assert config.get('x').value == 10
+    assert config.get('x').name == 'x'
 
     config.x = 5
     assert config.x == 5
-    assert config.get_param(key='x').value == 5
+    assert config.get('x').value == 5
 
 
 def test_validate_empty(define_configuration):
@@ -201,7 +201,7 @@ def test_copy(get_default_config):
 def test_deepcopy(get_deepcopy_config):
     config, copy = get_deepcopy_config
     copy.param2.append(5)
-    assert config.param2 == [1, 2, 3, 5]
+    assert config.param2 == [1, 2, 3]
     assert copy.param2 == [1, 2, 3, 5]
 
 

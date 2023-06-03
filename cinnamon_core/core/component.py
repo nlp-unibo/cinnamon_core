@@ -3,11 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import AnyStr, Any, Iterable, Optional, Dict, Union, TypeVar, Type, cast
 
-from dotmap import DotMap
 from typeguard import check_type
 
 from cinnamon_core import core
 from cinnamon_core.core.configuration import Configuration
+from cinnamon_core.core.data import FieldDict
 from cinnamon_core.utility.pickle_utility import save_pickle, load_pickle
 
 C = TypeVar('C', bound='Component')
@@ -119,8 +119,8 @@ class Component:
     @property
     def state(
             self
-    ) -> DotMap:
-        return DotMap(self.__dict__)
+    ) -> FieldDict:
+        return FieldDict(self.__dict__)
 
     def get_delta_copy(
             self: Type[C],
