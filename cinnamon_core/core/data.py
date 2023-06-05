@@ -92,7 +92,7 @@ class Field:
                 f'value: {self.value} --{os.linesep}'
                 f'type_hint: {self.type_hint} --{os.linesep}'
                 f'description: {self.description} --{os.linesep}'
-                f'tags: {self.tags}')
+                f'tags: {self.tags}--{os.linesep}')
 
     def __str__(
             self
@@ -152,7 +152,10 @@ class FieldDict(dict):
             self,
             item
     ):
-        return self.get(item).value
+        field = self.get(item)
+        if field is None:
+            raise AttributeError(f'Could not find attribute {item}')
+        return field.value
 
     def __setattr__(
             self,
@@ -197,6 +200,12 @@ class FieldDict(dict):
             return super().__getitem__(item)
 
         return super().__getitem__(item).value if return_value else super().__getitem__(item)
+
+    def to_value_dict(
+            self
+    ):
+        return {key: field.value if type(field.value) != FieldDict else field.value.to_value_dict()
+                for key, field in self.items() if key != 'conditions'}
 
     def add(
             self,

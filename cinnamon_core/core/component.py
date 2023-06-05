@@ -154,6 +154,21 @@ class Component:
         """
         pass
 
+    def find(
+            self,
+            name: str
+    ) -> Optional[Any]:
+        if name in self.config or hasattr(self, name):
+            return getattr(self, name)
+        else:
+            children = [param.value for param_key, param in self.config.items() if isinstance(param.value, Component)]
+            for child in children:
+                child_find = child.find(name=name)
+                if child_find is not None:
+                    return child_find
+
+        return None
+
     @classmethod
     def build_component_from_key(
             cls: Type[C],

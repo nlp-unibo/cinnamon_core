@@ -39,3 +39,14 @@ def test_delta_copy(
                                value=5)
     assert 'x' not in delta_copy.config
     assert component.x == 5
+
+
+def test_find():
+    parent = Component(config=Configuration())
+    parent.config.add_short(name='x', value=5)
+    parent.config.add_short(name='child', value=Component(Configuration({'y': 10})))
+
+    assert parent.x == 5
+    assert parent.config.child.y == 10
+    assert parent.find(name='x') == 5
+    assert parent.find(name='y') == 10

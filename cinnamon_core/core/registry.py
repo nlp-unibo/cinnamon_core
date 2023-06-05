@@ -295,6 +295,7 @@ class Registry:
     VARIANTS_QUEUE = []
     MODULE_SCOPE: AnyStr = None
     REGISTER_SCOPE: AnyStr = None
+    REGISTERED_NAMESPACES: List[str] = []
 
     @staticmethod
     def load_registrations(
@@ -365,7 +366,8 @@ class Registry:
         if registration_key in Registry.REGISTRY:
             return True
 
-        Registry.try_resolve_module_from_namespace(namespace=registration_key.namespace)
+        if registration_key.namespace not in Registry.REGISTERED_NAMESPACES:
+            Registry.try_resolve_module_from_namespace(namespace=registration_key.namespace)
 
         if registration_key not in Registry.REGISTRY:
             return False
@@ -715,6 +717,8 @@ class Registry:
             ``NotRegisteredException``: if ``strict = True`` and no ``ConfigurationInfo`` is found in the ``Registry``
             using the specified ``config_registration_key``.
         """
+        # Trigger potential latent registrations before attempting registry lookup
+        Registry.is_in_registry(registration_key=config_registration_key)
 
         config_registration_key = RegistrationKey.parse(registration_key=config_registration_key)
 
@@ -870,7 +874,7 @@ class Registry:
             parameter_variants_only: bool = False,
             allow_parameter_variants: bool = True,
             configuration_constructor: Callable[[Any], Configuration] = None,
-            configuration_constructor_args: Optional[Dict] = None
+            configuration_kwargs: Optional[Dict] = None
     ) -> Optional[List[RegistrationKey]]:
         """
         Registers and binds all possible ``Configuration`` variants.
@@ -888,7 +892,7 @@ class Registry:
             allow_parameter_variants: if True, the Registry looks for parameter variants iff
             no configuration variants have been detected. This functionality allows mixed nested configuration variants.
             configuration_constructor: TODO
-            configuration_constructor_args: TODO
+            configuration_kwargs: TODO
 
         Returns:
             the list of ``RegistrationKey`` used to register each ``Configuration`` variant
@@ -896,8 +900,19 @@ class Registry:
 
         configuration_constructor = configuration_constructor \
             if configuration_constructor is not None else configuration_class.get_default
-        configuration_constructor_args = configuration_constructor_args \
-            if configuration_constructor_args is not None else {}
+        configuration_kwargs = configuration_kwargs \
+            if configuration_kwargs is not None else {}
+
+        if not Registry.is_in_registry(registration_key=RegistrationKey(name=name,
+                                                                        tags=tags,
+                                                                        namespace=namespace)):
+            Registry.register_and_bind(configuration_class=configuration_class,
+                                       component_class=component_class,
+                                       configuration_constructor=configuration_constructor,
+                                       configuration_kwargs=configuration_kwargs,
+                                       name=name,
+                                       tags=tags,
+                                       namespace=namespace)
 
         variants = configuration_class.variants
 
@@ -910,6 +925,7 @@ class Registry:
                                               tags=variant_tags,
                                               namespace=namespace)
 
+                # TODO: register_and_bind_variants iff allow_parameter_variants
                 # Register iff not registered already
                 if not Registry.is_in_registry(registration_key=variant_key):
                     variant_key = Registry.register_and_bind(configuration_class=configuration_class,
@@ -924,11 +940,12 @@ class Registry:
             if len(variants) or not allow_parameter_variants:
                 return new_registered_conf_keys
 
-        built_config = configuration_constructor(**configuration_constructor_args)
+        built_config = configuration_constructor(**configuration_kwargs)
 
         variant_name = [variant.name
                         for variant in configuration_class.variants
-                        if variant.method.__name__ == configuration_constructor.__func__.__name__]
+                        if variant.method.__name__ == configuration_constructor.__func__.__name__
+                        and variant.class_name == configuration_constructor.__qualname__.split('.')[0]]
         if len(variant_name) > 1:
             raise RuntimeError(f'Expected to find a single registered variant. Found {len(variant_name)}. '
                                f'Did you decorate the specified constructor with @add_variant?')
@@ -949,7 +966,7 @@ class Registry:
 
         # Add variants to each registration child iff no variants have been specified
         for child_key, child in children.items():
-            if child.variants is None:
+            if child.variants is None and child.value is not None:
                 child_regr_key = child.value
                 child_config_info = Registry.retrieve_configurations_from_key(config_registration_key=child_regr_key,
                                                                               exact_match=True)
@@ -967,8 +984,8 @@ class Registry:
                     parameter_variants_only=parameter_variants_only,
                     allow_parameter_variants=allow_parameter_variants,
                     configuration_constructor=child_config_info.constructor,
-                    configuration_constructor_args=child_config_info.kwargs)
-                built_config.get_param(child_key).variants = child_variants
+                    configuration_kwargs=child_config_info.kwargs)
+                built_config.get(child_key).variants = child_variants
 
         # Register each combination of parameter variants
         parameter_combinations = built_config.get_variants_combinations()
@@ -1014,7 +1031,7 @@ class Registry:
                                                              configuration_kwargs={
                                                                  'params': combination,
                                                                  'constructor': configuration_constructor,
-                                                                 'constructor_kwargs': configuration_constructor_args
+                                                                 'constructor_kwargs': configuration_kwargs
                                                              },
                                                              component_class=component_class,
                                                              name=name,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import os
 from copy import deepcopy
 from dataclasses import dataclass
@@ -28,10 +29,11 @@ class VariantSpec:
     """
     name: str
     method: Constructor
+    class_name: str
 
 
 def add_variant(
-        variant_name: Optional[str] = None
+        name: Optional[str] = None
 ) -> Callable[[Constructor], Constructor]:
     """
     Marks a ``Configuration`` method as a ``Configuration`` variant.
@@ -39,7 +41,7 @@ def add_variant(
     (e.g., ``Configuration.get_default()``).
 
     Args:
-        variant_name: unique identifier of the ``Configuration`` variant.
+        name: unique identifier of the ``Configuration`` variant.
 
     Returns:
         The decorated ``Configuration`` method.
@@ -50,7 +52,8 @@ def add_variant(
 
     ) -> Constructor:
         method.variant = True
-        method.variant_name = variant_name if variant_name is not None else method.__name__
+        method.variant_name = name if name is not None else method.__name__
+        method.class_name = method.__qualname__.split('.')[0]
         return method
 
     return _add_variant
@@ -77,7 +80,8 @@ def supports_variants(
 
         if getattr(method, "variant", False):
             variant_name = getattr(method, 'variant_name', None)
-            variants.append(VariantSpec(name=variant_name, method=method))
+            class_name = getattr(method, 'class_name', None)
+            variants.append(VariantSpec(name=variant_name, method=method, class_name=class_name))
     cls.variants = tuple(variants)
     return cls
 
@@ -131,11 +135,14 @@ class Configuration(FieldDict):
                 param_name: Hashable,
                 type_hint: Type
         ) -> bool:
+            found_param = parameters.get(param_name)
             try:
-                found_param = parameters.get(param_name)
-                check_type(argname=str(found_param.name),
-                           value=found_param.value,
-                           expected_type=type_hint)
+                if inspect.isclass(found_param.value):
+                    return issubclass(found_param.value, type_hint)
+                else:
+                    check_type(argname=str(found_param.name),
+                               value=found_param.value,
+                               expected_type=type_hint)
             except TypeError:
                 return False
             return True

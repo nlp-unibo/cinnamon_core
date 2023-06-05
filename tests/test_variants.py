@@ -37,7 +37,7 @@ class ParentConfig(Configuration):
         return config
 
     @classmethod
-    @add_variant(variant_name='variant1')
+    @add_variant(name='variant1')
     def variant1(
             cls
     ) -> ParentConfig:
@@ -47,7 +47,7 @@ class ParentConfig(Configuration):
         return default
 
     @classmethod
-    @add_variant(variant_name='variant2')
+    @add_variant(name='variant2')
     def variant2(
             cls
     ) -> ParentConfig:
@@ -275,7 +275,7 @@ class ConfigE(Configuration):
         return config
 
     @classmethod
-    @add_variant(variant_name='variant1')
+    @add_variant(name='variant1')
     def variant1(
             cls
     ):
