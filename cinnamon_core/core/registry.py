@@ -874,7 +874,7 @@ class Registry:
             parameter_variants_only: bool = False,
             allow_parameter_variants: bool = True,
             configuration_constructor: Callable[[Any], Configuration] = None,
-            configuration_kwargs: Optional[Dict] = None
+            configuration_kwargs: Optional[Dict] = None,
     ) -> Optional[List[RegistrationKey]]:
         """
         Registers and binds all possible ``Configuration`` variants.
@@ -925,17 +925,16 @@ class Registry:
                                               tags=variant_tags,
                                               namespace=namespace)
 
-                # TODO: register_and_bind_variants iff allow_parameter_variants
                 # Register iff not registered already
                 if not Registry.is_in_registry(registration_key=variant_key):
-                    variant_key = Registry.register_and_bind(configuration_class=configuration_class,
-                                                             configuration_constructor=variant_constructor,
-                                                             component_class=component_class,
-                                                             name=name,
-                                                             tags=variant_tags,
-                                                             namespace=namespace)
-
-                new_registered_conf_keys.append(variant_key)
+                    new_registered_conf_keys.append(
+                        Registry.register_and_bind(configuration_class=configuration_class,
+                                                   configuration_constructor=variant_constructor,
+                                                   component_class=component_class,
+                                                   name=name,
+                                                   tags=variant_tags,
+                                                   namespace=namespace)
+                    )
 
             if len(variants) or not allow_parameter_variants:
                 return new_registered_conf_keys

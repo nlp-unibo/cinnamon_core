@@ -15,7 +15,7 @@ class ParentConfig(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ParentConfig:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1',
@@ -62,7 +62,7 @@ class NestedChild(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> NestedChild:
+    ):
         config = super().get_default()
 
         config.add_short(name='child_A', value=RegistrationKey(name='config_c',
@@ -131,7 +131,8 @@ def test_flatten_configuration_variants(
                                                        component_class=Component,
                                                        name='parent',
                                                        namespace='testing',
-                                                       parameter_variants_only=False)
+                                                       parameter_variants_only=False,
+                                                       allow_parameter_variants=True)
     assert len(variant_keys) == 2
     assert RegistrationKey(name='parent', tags={'variant1'}, namespace='testing') in variant_keys
     assert RegistrationKey(name='parent', tags={'variant2'}, namespace='testing') in variant_keys
@@ -142,7 +143,7 @@ class ConfigA(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ConfigA:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1', value=True, type_hint=bool, variants=[False, True])
@@ -156,7 +157,7 @@ class ConfigB(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ConfigB:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1', value=1, type_hint=int, variants=[1, 2])
@@ -171,7 +172,7 @@ class ConfigC(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ConfigC:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1', value=False, type_hint=bool, variants=[False, True])
@@ -252,7 +253,7 @@ class ConfigD(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ConfigA:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1', value=True, type_hint=bool, variants=[False, True])
@@ -267,7 +268,7 @@ class ConfigE(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ConfigB:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1', value=1, type_hint=int, variants=[1, 2])
@@ -308,7 +309,7 @@ class ConfigF(Configuration):
     @classmethod
     def get_default(
             cls
-    ) -> ConfigD:
+    ):
         config = super().get_default()
 
         config.add_short(name='param_1', value=True, type_hint=bool, variants=[False, True])
