@@ -1019,6 +1019,8 @@ class Registry:
                 else:
                     for tag in value.tags:
                         combination_tags.add(f'{key}.{tag}')
+                    if value.namespace != namespace:
+                        combination_tags.add(f'{key}.{value.namespace}')
             combination_tags = tags.union(combination_tags) if tags is not None else combination_tags
             combination_tags = combination_tags if not is_variant else combination_tags.union({variant_name})
             combination_key = RegistrationKey(name=name,
@@ -1049,7 +1051,8 @@ class Registry:
             tags: Tag = None,
             parameter_variants_only: bool = False,
             allow_parameter_variants: bool = True,
-            configuration_constructor: Callable[[], Configuration] = None
+            configuration_constructor: Callable[[], Configuration] = None,
+            configuration_kwargs: Optional[Dict] = None
     ):
         Registry.VARIANTS_QUEUE.append(partial(Registry.register_and_bind_variants,
                                                configuration_class=configuration_class,
@@ -1059,7 +1062,8 @@ class Registry:
                                                tags=tags,
                                                parameter_variants_only=parameter_variants_only,
                                                allow_parameter_variants=allow_parameter_variants,
-                                               configuration_constructor=configuration_constructor))
+                                               configuration_constructor=configuration_constructor,
+                                               configuration_kwargs=configuration_kwargs))
 
     @staticmethod
     def register_and_bind_queued_variants() -> List[RegistrationKey]:
