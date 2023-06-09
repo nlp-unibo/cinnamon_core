@@ -1,9 +1,10 @@
 from pathlib import Path
+from typing import Type
 
 import pytest
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration
+from cinnamon_core.core.configuration import Configuration, C
 from cinnamon_core.core.registry import Registry, RegistrationKey, NotRegisteredException, \
     AlreadyRegisteredException, AlreadyBoundException
 
@@ -192,3 +193,40 @@ def test_retrieve_external_configurations(
     component = Registry.build_component(name='test',
                                          namespace='external')
     assert isinstance(component, Component)
+
+
+class ConfigA(Configuration):
+
+    @classmethod
+    def get_default(
+            cls: Type[C]
+    ) -> C:
+        config = super().get_default()
+
+        config.add_short(name='x',
+                         value=5,
+                         type_hint=int)
+        config.add_short(name='y',
+                         value=10,
+                         type_hint=int)
+        return config
+
+
+def test_register_delta_copy(
+        reset_registry
+):
+    Registry.register_and_bind(configuration_class=ConfigA,
+                               component_class=Component,
+                               configuration_constructor=ConfigA.get_delta_class_copy,
+                               configuration_kwargs={
+                                   'params': {
+                                       'x': 10,
+                                       'y': 15
+                                   }
+                               },
+                               name='config',
+                               namespace='testing')
+    component = Registry.build_component_from_key(config_registration_key=RegistrationKey(name='config',
+                                                                                          namespace='testing'))
+    assert component.x == 10
+    assert component.y == 15

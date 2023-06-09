@@ -8,6 +8,7 @@ from functools import partial
 from pathlib import Path
 from typing import Type, AnyStr, List, Set, Dict, Any, Union, Optional, Callable
 
+import networkx as nx
 from typeguard import check_type
 
 from cinnamon_core.core.component import Component
@@ -235,6 +236,23 @@ class InvalidConfigurationTypeException(Exception):
             f"Expected to build configuration of type {expected_type} but got {actual_type}")
 
 
+class DisconnectedGraphException(Exception):
+
+    def __init__(
+            self,
+            nodes
+    ):
+        super().__init__(f'Disconnected graph! Nodes {nodes} are not connected!')
+
+
+class NotADAGException(Exception):
+
+    def __init__(
+            self
+    ):
+        super().__init__(f'The built graph is not a DAG!')
+
+
 @dataclass
 class ConfigurationInfo:
     """
@@ -290,12 +308,17 @@ class Registry:
 
     REGISTRY: Dict = {}
     BINDINGS: Dict = {}
-    BUILT_MAPPINGS: Dict = {}
+    BUILT_REGISTRY: Dict = {}
+
     REGISTRATION_METHODS: List = []
-    VARIANTS_QUEUE = []
     MODULE_SCOPE: AnyStr = None
     REGISTER_SCOPE: AnyStr = None
     REGISTERED_NAMESPACES: List[str] = []
+
+    ROOT_KEY = RegistrationKey(name='root', namespace='root')
+    DEPENDENCY_DAG = nx.DiGraph()
+    DEPENDENCY_DAG.add_node(ROOT_KEY)
+    REGISTRATION_REGISTRY = {}
 
     @staticmethod
     def load_registrations(
@@ -380,8 +403,15 @@ class Registry:
     ):
         Registry.REGISTRY.clear()
         Registry.BINDINGS.clear()
-        Registry.BUILT_MAPPINGS.clear()
+        Registry.BUILT_REGISTRY.clear()
+
         Registry.REGISTRATION_METHODS.clear()
+        Registry.MODULE_SCOPE = None
+        Registry.REGISTER_SCOPE = None
+        Registry.REGISTERED_NAMESPACES.clear()
+
+        Registry.DEPENDENCY_DAG.clear()
+        Registry.REGISTRATION_REGISTRY.clear()
 
     # Registration APIs
 
@@ -539,7 +569,7 @@ class Registry:
         """
         if not Registry.is_in_registry(registration_key=config_registration_key):
             raise NotRegisteredException(registration_key=config_registration_key)
-        Registry.BUILT_MAPPINGS[config_registration_key] = component
+        Registry.BUILT_REGISTRY[config_registration_key] = component
 
     @staticmethod
     def register_built_component(
@@ -589,7 +619,7 @@ class Registry:
         if not Registry.is_in_registry(registration_key=config_registration_key):
             raise NotRegisteredException(registration_key=config_registration_key)
 
-        return Registry.BUILT_MAPPINGS[config_registration_key]
+        return Registry.BUILT_REGISTRY[config_registration_key]
 
     @staticmethod
     def retrieve_built_component(
@@ -622,11 +652,42 @@ class Registry:
     # Configuration
 
     @staticmethod
+    def is_in_graph(
+            name: str,
+            namespace: str = 'generic',
+            tags: Tag = None,
+    ) -> bool:
+        key = RegistrationKey(name=name,
+                              tags=tags,
+                              namespace=namespace)
+        return Registry.is_in_graph_from_key(registration_key=key)
+
+    @staticmethod
+    def is_in_graph_from_key(
+            registration_key: Registration
+    ) -> bool:
+        return registration_key in Registry.DEPENDENCY_DAG
+
+    @staticmethod
+    def check_registration_graph(
+
+    ) -> bool:
+        isolated_nodes = list(nx.isolates(Registry.DEPENDENCY_DAG))
+        if len(isolated_nodes) > 0:
+            raise DisconnectedGraphException(nodes=isolated_nodes)
+
+        if not nx.algorithms.dag.is_directed_acyclic_graph(Registry.DEPENDENCY_DAG):
+            raise NotADAGException()
+
+        return True
+
+    @staticmethod
     def register_configuration(
             configuration_class: Type[Configuration],
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
+            is_default: bool = False,
             configuration_constructor: Optional[Constructor] = None,
             configuration_kwargs: Optional[Dict] = None,
     ) -> RegistrationKey:
@@ -639,6 +700,7 @@ class Registry:
             name: the ``name`` field of ``RegistrationKey``
             namespace: the ``namespace`` field of ``RegistrationKey``
             tags: the ``tags`` field of ``RegistrationKey``
+            is_default: TODO
             configuration_constructor: the constructor method to build the ``Configuration`` instance from its class
             configuration_kwargs: potential arguments to the ``configuration_constructor`` method.
 
@@ -649,6 +711,9 @@ class Registry:
             ``AlreadyRegisteredException``: if the ``RegistrationKey`` is already used
         """
 
+        tags = tags.union({'default'}) if tags is not None and is_default else tags
+        if tags is None and is_default:
+            tags = {'default'}
         registration_key = RegistrationKey(name=name,
                                            tags=tags,
                                            namespace=namespace)
@@ -692,6 +757,83 @@ class Registry:
         Registry.REGISTRY[registration_key] = ConfigurationInfo(class_type=configuration_class,
                                                                 constructor=configuration_constructor,
                                                                 kwargs=configuration_kwargs)
+        return registration_key
+
+    @staticmethod
+    def add_configuration(
+            configuration_class: Type[Configuration],
+            name: str,
+            namespace: str = 'generic',
+            tags: Tag = None,
+            is_default: bool = False,
+            configuration_constructor: Optional[Constructor] = None,
+            configuration_kwargs: Optional[Dict] = None,
+            parent: Optional[RegistrationKey] = None,
+            children: Optional[List[RegistrationKey]] = None,
+    ) -> RegistrationKey:
+        tags = tags.union({'default'}) if tags is not None and is_default else tags
+        if tags is None and is_default:
+            tags = {'default'}
+        registration_key = RegistrationKey(name=name,
+                                           tags=tags,
+                                           namespace=namespace)
+        return Registry.add_configuration_from_key(config_class=configuration_class,
+                                                   registration_key=registration_key,
+                                                   config_constructor=configuration_constructor,
+                                                   config_kwargs=configuration_kwargs,
+                                                   parent=parent,
+                                                   children=children)
+
+    @staticmethod
+    def add_configuration_from_key(
+            config_class: Type[Configuration],
+            registration_key: RegistrationKey,
+            config_constructor: Optional[Constructor] = None,
+            config_kwargs: Optional[Dict] = None,
+            parent: Optional[RegistrationKey] = None,
+            children: Optional[List[RegistrationKey]] = None,
+    ) -> RegistrationKey:
+        if not Registry.is_in_graph_from_key(registration_key=registration_key):
+            Registry.DEPENDENCY_DAG.add_node(registration_key)
+            Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, registration_key)
+        else:
+            if parent is not None:
+                Registry.DEPENDENCY_DAG.add_edge(parent, registration_key)
+
+            if children is not None:
+                for child in children:
+                    Registry.DEPENDENCY_DAG.add_edge(registration_key, child)
+
+        # Check children
+        config_kwargs = config_kwargs if config_kwargs is not None else {}
+        config_constructor = config_constructor if config_constructor is not None else config_class.get_default
+        built_config = config_constructor(**config_kwargs)
+        children = {param_key: param
+                    for param_key, param in built_config.items()
+                    if param.is_registration and not param.is_calibration}
+
+        for child_name, child in children.items():
+            child_key = child.value
+            if child_key is not None:
+                if not Registry.is_in_graph_from_key(child_key):
+                    Registry.DEPENDENCY_DAG.add_node(child_key)
+
+                Registry.DEPENDENCY_DAG.add_edge(registration_key, child_key)
+
+            if child.variants is not None:
+                for variant_key in child.variants:
+                    if not Registry.is_in_graph_from_key(variant_key):
+                        Registry.DEPENDENCY_DAG.add_node(variant_key)
+                    Registry.DEPENDENCY_DAG.add_edge(registration_key, variant_key)
+
+        # Memo registration method
+        if registration_key not in Registry.REGISTRATION_REGISTRY:
+            Registry.REGISTRATION_REGISTRY[registration_key] = partial(Registry.register_configuration_from_key,
+                                                                       configuration_class=config_class,
+                                                                       registration_key=registration_key,
+                                                                       configuration_constructor=config_constructor,
+                                                                       configuration_kwargs=config_kwargs)
+
         return registration_key
 
     @staticmethod
@@ -828,9 +970,9 @@ class Registry:
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
+            is_default: bool = False,
             configuration_constructor: Optional[Constructor] = None,
-            configuration_kwargs: Optional[Dict] = None,
-            is_default: bool = False
+            configuration_kwargs: Optional[Dict] = None
     ) -> RegistrationKey:
         """
         Registers a ``Configuration`` and binds it to a ``Component``.
@@ -853,28 +995,92 @@ class Registry:
         if tags is None and is_default:
             tags = {'default'}
 
-        config_regr_key = Registry.register_configuration(configuration_class=configuration_class,
-                                                          configuration_constructor=configuration_constructor,
-                                                          configuration_kwargs=configuration_kwargs,
-                                                          name=name,
-                                                          tags=tags,
-                                                          namespace=namespace)
+        key = Registry.register_configuration(configuration_class=configuration_class,
+                                              configuration_constructor=configuration_constructor,
+                                              configuration_kwargs=configuration_kwargs,
+                                              name=name,
+                                              tags=tags,
+                                              namespace=namespace)
 
-        Registry.BINDINGS[config_regr_key] = component_class
+        Registry.bind_from_key(config_registration_key=key,
+                               component_class=component_class)
 
-        return config_regr_key
+        return key
+
+    @staticmethod
+    def add_and_bind(
+            config_class: Type[Configuration],
+            component_class: Type,
+            name: str,
+            namespace: str = 'generic',
+            tags: Tag = None,
+            is_default: bool = False,
+            config_constructor: Optional[Constructor] = None,
+            config_kwargs: Optional[Dict] = None,
+            parent: Optional[RegistrationKey] = None,
+            children: Optional[List[RegistrationKey]] = None
+    ) -> RegistrationKey:
+        tags = tags.union({'default'}) if tags is not None and is_default else tags
+        if tags is None and is_default:
+            tags = {'default'}
+        registration_key = RegistrationKey(name=name,
+                                           tags=tags,
+                                           namespace=namespace)
+        if not Registry.is_in_graph_from_key(registration_key=registration_key):
+            Registry.DEPENDENCY_DAG.add_node(registration_key)
+            Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, registration_key)
+        else:
+            if parent is not None:
+                Registry.DEPENDENCY_DAG.add_edge(parent, registration_key)
+
+            if children is not None:
+                for child in children:
+                    Registry.DEPENDENCY_DAG.add_edge(registration_key, child)
+
+        config_kwargs = config_kwargs if config_kwargs is not None else {}
+        config_constructor = config_constructor if config_constructor is not None else config_class.get_default
+        built_config = config_constructor(**config_kwargs)
+        children = {param_key: param
+                    for param_key, param in built_config.items()
+                    if param.is_registration and not param.is_calibration}
+
+        for child_name, child in children.items():
+            child_key = child.value
+            if child_key is not None:
+                if not Registry.is_in_graph_from_key(child_key):
+                    Registry.DEPENDENCY_DAG.add_node(child_key)
+
+                Registry.DEPENDENCY_DAG.add_edge(registration_key, child_key)
+
+            if child.variants is not None:
+                for variant_key in child.variants:
+                    if not Registry.is_in_graph_from_key(variant_key):
+                        Registry.DEPENDENCY_DAG.add_node(variant_key)
+                    Registry.DEPENDENCY_DAG.add_edge(registration_key, variant_key)
+
+        if registration_key not in Registry.REGISTRATION_REGISTRY:
+            Registry.REGISTRATION_REGISTRY[registration_key] = partial(Registry.register_and_bind,
+                                                                       configuration_class=config_class,
+                                                                       component_class=component_class,
+                                                                       name=name,
+                                                                       tags=tags,
+                                                                       namespace=namespace,
+                                                                       configuration_constructor=config_constructor,
+                                                                       configuration_kwargs=config_kwargs)
+
+        return registration_key
 
     @staticmethod
     def register_and_bind_variants(
-            configuration_class: Type[Configuration],
+            config_class: Type[Configuration],
             component_class: Type[Component],
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
             parameter_variants_only: bool = False,
             allow_parameter_variants: bool = True,
-            configuration_constructor: Callable[[Any], Configuration] = None,
-            configuration_kwargs: Optional[Dict] = None,
+            config_constructor: Callable[[Any], Configuration] = None,
+            config_kwargs: Optional[Dict] = None,
     ) -> Optional[List[RegistrationKey]]:
         """
         Registers and binds all possible ``Configuration`` variants.
@@ -883,7 +1089,7 @@ class Registry:
         to the given ``Component``.
 
         Args:
-            configuration_class: the class of the ``Configuration``
+            config_class: the class of the ``Configuration``
             component_class: the ``Component`` class to bound to the ``Configuration`` via its ``RegistrationKey``
             name: the ``name`` field of ``RegistrationKey``
             tags: the ``tags`` field of ``RegistrationKey``
@@ -891,36 +1097,36 @@ class Registry:
             parameter_variants_only: if True, only parameter variants are considered.
             allow_parameter_variants: if True, the Registry looks for parameter variants iff
             no configuration variants have been detected. This functionality allows mixed nested configuration variants.
-            configuration_constructor: TODO
-            configuration_kwargs: TODO
+            config_constructor: TODO
+            config_kwargs: TODO
 
         Returns:
             the list of ``RegistrationKey`` used to register each ``Configuration`` variant
         """
 
-        configuration_constructor = configuration_constructor \
-            if configuration_constructor is not None else configuration_class.get_default
-        configuration_kwargs = configuration_kwargs \
-            if configuration_kwargs is not None else {}
+        config_constructor = config_constructor \
+            if config_constructor is not None else config_class.get_default
+        config_kwargs = config_kwargs \
+            if config_kwargs is not None else {}
 
         if not Registry.is_in_registry(registration_key=RegistrationKey(name=name,
                                                                         tags=tags,
                                                                         namespace=namespace)):
-            Registry.register_and_bind(configuration_class=configuration_class,
+            Registry.register_and_bind(configuration_class=config_class,
                                        component_class=component_class,
-                                       configuration_constructor=configuration_constructor,
-                                       configuration_kwargs=configuration_kwargs,
+                                       configuration_constructor=config_constructor,
+                                       configuration_kwargs=config_kwargs,
                                        name=name,
                                        tags=tags,
                                        namespace=namespace)
 
-        variants = configuration_class.variants
+        variants = config_class.variants
 
-        if not parameter_variants_only and configuration_constructor == configuration_class.get_default:
+        if not parameter_variants_only and config_constructor == config_class.get_default:
             new_registered_conf_keys = []
             for variant in variants:
                 variant_tags = tags.union({variant.name}) if tags is not None else {variant.name}
-                variant_constructor = getattr(configuration_class, variant.method.__name__)
+                variant_constructor = getattr(config_class, variant.method.__name__)
                 variant_key = RegistrationKey(name=name,
                                               tags=variant_tags,
                                               namespace=namespace)
@@ -928,7 +1134,7 @@ class Registry:
                 # Register iff not registered already
                 if not Registry.is_in_registry(registration_key=variant_key):
                     new_registered_conf_keys.append(
-                        Registry.register_and_bind(configuration_class=configuration_class,
+                        Registry.register_and_bind(configuration_class=config_class,
                                                    configuration_constructor=variant_constructor,
                                                    component_class=component_class,
                                                    name=name,
@@ -939,12 +1145,12 @@ class Registry:
             if len(variants) or not allow_parameter_variants:
                 return new_registered_conf_keys
 
-        built_config = configuration_constructor(**configuration_kwargs)
+        built_config = config_constructor(**config_kwargs)
 
         variant_name = [variant.name
-                        for variant in configuration_class.variants
-                        if variant.method.__name__ == configuration_constructor.__func__.__name__
-                        and variant.class_name == configuration_constructor.__qualname__.split('.')[0]]
+                        for variant in config_class.variants
+                        if variant.method.__name__ == config_constructor.__func__.__name__
+                        and variant.class_name == config_constructor.__qualname__.split('.')[0]]
         if len(variant_name) > 1:
             raise RuntimeError(f'Expected to find a single registered variant. Found {len(variant_name)}. '
                                f'Did you decorate the specified constructor with @add_variant?')
@@ -975,15 +1181,15 @@ class Registry:
                 child_component_class = Registry.BINDINGS[child_regr_key]
 
                 child_variants = Registry.register_and_bind_variants(
-                    configuration_class=child_config_info.class_type,
+                    config_class=child_config_info.class_type,
                     component_class=child_component_class,
                     name=child_regr_key.name,
                     tags=child_regr_key.tags,
                     namespace=child_regr_key.namespace,
                     parameter_variants_only=parameter_variants_only,
                     allow_parameter_variants=allow_parameter_variants,
-                    configuration_constructor=child_config_info.constructor,
-                    configuration_kwargs=child_config_info.kwargs)
+                    config_constructor=child_config_info.constructor,
+                    config_kwargs=child_config_info.kwargs)
                 built_config.get(child_key).variants = child_variants
 
         # Register each combination of parameter variants
@@ -1001,8 +1207,8 @@ class Registry:
                 return None
             else:
                 # Register configuration
-                Registry.register_and_bind(configuration_class=configuration_class,
-                                           configuration_constructor=configuration_class.get_default,
+                Registry.register_and_bind(configuration_class=config_class,
+                                           configuration_constructor=config_class.get_default,
                                            component_class=component_class,
                                            name=name,
                                            tags=tags if not is_variant else tags.union({variant_name}),
@@ -1027,12 +1233,12 @@ class Registry:
                                               tags=combination_tags,
                                               namespace=namespace)
             if not Registry.is_in_registry(registration_key=combination_key):
-                combination_key = Registry.register_and_bind(configuration_class=configuration_class,
-                                                             configuration_constructor=configuration_class.get_delta_class_copy,
+                combination_key = Registry.register_and_bind(configuration_class=config_class,
+                                                             configuration_constructor=config_class.get_delta_class_copy,
                                                              configuration_kwargs={
                                                                  'params': combination,
-                                                                 'constructor': configuration_constructor,
-                                                                 'constructor_kwargs': configuration_kwargs
+                                                                 'constructor': config_constructor,
+                                                                 'constructor_kwargs': config_kwargs
                                                              },
                                                              component_class=component_class,
                                                              name=name,
@@ -1043,34 +1249,137 @@ class Registry:
         return new_registered_conf_keys
 
     @staticmethod
-    def queue_register_and_bind_variants(
-            configuration_class: Type[Configuration],
+    def add_and_bind_variants(
+            config_class: Type[Configuration],
             component_class: Type[Component],
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
             parameter_variants_only: bool = False,
             allow_parameter_variants: bool = True,
-            configuration_constructor: Callable[[], Configuration] = None,
-            configuration_kwargs: Optional[Dict] = None
-    ):
-        Registry.VARIANTS_QUEUE.append(partial(Registry.register_and_bind_variants,
-                                               configuration_class=configuration_class,
-                                               component_class=component_class,
-                                               name=name,
-                                               namespace=namespace,
-                                               tags=tags,
-                                               parameter_variants_only=parameter_variants_only,
-                                               allow_parameter_variants=allow_parameter_variants,
-                                               configuration_constructor=configuration_constructor,
-                                               configuration_kwargs=configuration_kwargs))
+            config_constructor: Callable[[Any], Configuration] = None,
+            config_kwargs: Optional[Dict] = None,
+    ) -> Optional[List[RegistrationKey]]:
+        """
+        Registers and binds all possible ``Configuration`` variants.
+        A configuration variant is a variant of ``Configuration`` parameters.
+        Given a ``Configuration`` class, all its variants are retrieved, registered in the ``Registry`` and bound
+        to the given ``Component``.
+
+        Args:
+            config_class: the class of the ``Configuration``
+            component_class: the ``Component`` class to bound to the ``Configuration`` via its ``RegistrationKey``
+            name: the ``name`` field of ``RegistrationKey``
+            tags: the ``tags`` field of ``RegistrationKey``
+            namespace: the ``namespace`` field of ``RegistrationKey``
+            parameter_variants_only: if True, only parameter variants are considered.
+            allow_parameter_variants: if True, the Registry looks for parameter variants iff
+            no configuration variants have been detected. This functionality allows mixed nested configuration variants.
+            config_constructor: TODO
+            config_kwargs: TODO
+            parent: TODO
+            children: TODO
+
+        Returns:
+            the list of ``RegistrationKey`` used to register each ``Configuration`` variant
+        """
+        config_constructor = config_constructor if config_constructor is not None else config_class.get_default
+        config_kwargs = config_kwargs if config_kwargs is not None else {}
+
+        all_keys = []
+
+        # Main key
+        main_key = RegistrationKey(name=name, tags=tags, namespace=namespace)
+        all_keys.append(main_key)
+
+        if main_key not in Registry.REGISTRATION_REGISTRY:
+            Registry.REGISTRATION_REGISTRY[main_key] = partial(Registry.register_and_bind_variants,
+                                                               config_class=config_class,
+                                                               component_class=component_class,
+                                                               name=name,
+                                                               tags=tags,
+                                                               namespace=namespace,
+                                                               parameter_variants_only=parameter_variants_only,
+                                                               allow_parameter_variants=allow_parameter_variants,
+                                                               config_constructor=config_constructor,
+                                                               config_kwargs=config_kwargs)
+
+        if not Registry.is_in_graph(name=name, tags=tags, namespace=namespace):
+            Registry.DEPENDENCY_DAG.add_node(main_key)
+            Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, main_key)
+
+        built_config = config_constructor(**config_kwargs)
+
+        variant_name = [variant.name
+                        for variant in config_class.variants
+                        if variant.method.__name__ == config_constructor.__func__.__name__
+                        and variant.class_name == config_constructor.__qualname__.split('.')[0]]
+        if len(variant_name) > 1:
+            raise RuntimeError(f'Expected to find a single registered variant. Found {len(variant_name)}. '
+                               f'Did you decorate the specified constructor with @add_variant?')
+        is_variant = len(variant_name) == 1
+
+        if is_variant:
+            variant_name = variant_name[0]
+
+            # Make sure we can work with a valid configuration
+            # This is not necessarily needed for default config since it is a template
+            built_config.validate()
+        else:
+            variant_name = None
+
+        children = {param_key: param
+                    for param_key, param in built_config.items()
+                    if param.is_registration and not param.is_calibration}
+
+        for child_name, child in children.items():
+            child_key = child.value
+            if child_key is not None:
+                all_keys.append(child_key)
+                if not Registry.is_in_graph_from_key(child_key):
+                    Registry.DEPENDENCY_DAG.add_node(child_key)
+
+                Registry.DEPENDENCY_DAG.add_edge(main_key, child_key)
+
+            if child.variants is not None:
+                for variant_key in child.variants:
+                    all_keys.append(variant_key)
+                    if not Registry.is_in_graph_from_key(variant_key):
+                        Registry.DEPENDENCY_DAG.add_node(variant_key)
+                    Registry.DEPENDENCY_DAG.add_edge(main_key, variant_key)
+
+        # Register each combination of parameter variants
+        parameter_combinations = built_config.get_variants_combinations()
+
+        # Register each combination
+        for combination in parameter_combinations:
+            combination_tags = set()
+            for key, value in combination.items():
+                if type(value) != RegistrationKey:
+                    combination_tags.add(f'{key}={value}')
+                else:
+                    for tag in value.tags:
+                        combination_tags.add(f'{key}.{tag}')
+                    if value.namespace != namespace:
+                        combination_tags.add(f'{key}.{value.namespace}')
+            combination_tags = tags.union(combination_tags) if tags is not None else combination_tags
+            combination_tags = combination_tags if not is_variant else combination_tags.union({variant_name})
+            combination_key = RegistrationKey(name=name,
+                                              tags=combination_tags,
+                                              namespace=namespace)
+            if not Registry.is_in_graph_from_key(registration_key=combination_key):
+                Registry.DEPENDENCY_DAG.add_node(combination_key)
+            Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, combination_key)
+            all_keys.append(combination_key)
+
+        return all_keys
 
     @staticmethod
-    def register_and_bind_queued_variants() -> List[RegistrationKey]:
-        variants = []
-        for queued_method in Registry.VARIANTS_QUEUE:
-            variants.extend(queued_method())
-        return variants
+    def expand_and_resolve_registration():
+        topological_sorted = reversed(list(nx.topological_sort(Registry.DEPENDENCY_DAG)))
+        for key in topological_sorted:
+            if key in Registry.REGISTRATION_REGISTRY:
+                Registry.REGISTRATION_REGISTRY[key]()
 
 
 __all__ = [

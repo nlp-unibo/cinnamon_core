@@ -96,7 +96,7 @@ def test_flatten_parameter_variants(
                                name='config_c',
                                namespace='testing')
 
-    variant_keys = Registry.register_and_bind_variants(configuration_class=ParentConfig,
+    variant_keys = Registry.register_and_bind_variants(config_class=ParentConfig,
                                                        component_class=Component,
                                                        name='parent',
                                                        namespace='testing',
@@ -127,7 +127,7 @@ def test_flatten_configuration_variants(
                                name='config_c',
                                namespace='testing')
 
-    variant_keys = Registry.register_and_bind_variants(configuration_class=ParentConfig,
+    variant_keys = Registry.register_and_bind_variants(config_class=ParentConfig,
                                                        component_class=Component,
                                                        name='parent',
                                                        namespace='testing',
@@ -194,7 +194,7 @@ def test_nested_parameter_variants(
                                name='config_c',
                                namespace='testing')
 
-    variant_keys = Registry.register_and_bind_variants(configuration_class=ConfigA,
+    variant_keys = Registry.register_and_bind_variants(config_class=ConfigA,
                                                        component_class=Component,
                                                        name='config_a',
                                                        namespace='testing',
@@ -216,7 +216,7 @@ def test_nested_configuration_variants(
                                name='config_c',
                                namespace='testing')
 
-    variant_keys = Registry.register_and_bind_variants(configuration_class=ConfigA,
+    variant_keys = Registry.register_and_bind_variants(config_class=ConfigA,
                                                        component_class=Component,
                                                        name='config_a',
                                                        namespace='testing',
@@ -239,7 +239,7 @@ def test_nested_configuration_variants_with_allow(
                                name='config_c',
                                namespace='testing')
 
-    variant_keys = Registry.register_and_bind_variants(configuration_class=ConfigA,
+    variant_keys = Registry.register_and_bind_variants(config_class=ConfigA,
                                                        component_class=Component,
                                                        name='config_a',
                                                        namespace='testing',
@@ -323,7 +323,7 @@ class ConfigF(Configuration):
 def test_variants_with_conditions(
         reset_registry
 ):
-    variant_keys = Registry.register_and_bind_variants(configuration_class=ConfigF,
+    variant_keys = Registry.register_and_bind_variants(config_class=ConfigF,
                                                        component_class=Component,
                                                        name='config_f',
                                                        namespace='testing',
