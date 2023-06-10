@@ -1,8 +1,10 @@
 from pathlib import Path
 from typing import AnyStr, Any, Union
 
-import simplejson
+import jsons
+import simplejson as json
 
+# TODO: fix this
 
 def load_json(
         filepath: Union[AnyStr, Path]
@@ -20,7 +22,8 @@ def load_json(
     filepath = Path(filepath) if type(filepath) != Path else filepath
 
     with filepath.open(mode='r') as f:
-        data = simplejson.load(f)
+        data = f.read()
+    data = jsons.load(data)
 
     return data
 
@@ -40,7 +43,8 @@ def save_json(
     filepath = Path(filepath) if type(filepath) != Path else filepath
 
     with filepath.open(mode='w') as f:
-        simplejson.dump(data, f, tuple_as_array=False, indent=4)
+        data = jsons.dump(data)
+        json.dump(data, f, tuple_as_array=False, indent=4)
 
 
 __all__ = ['load_json', 'save_json']

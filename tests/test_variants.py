@@ -81,17 +81,14 @@ def test_flatten_parameter_variants(
         reset_registry
 ):
     Registry.register_and_bind(configuration_class=NestedChild,
-                               configuration_constructor=NestedChild.get_default,
                                component_class=Component,
                                name='config_a',
                                namespace='testing')
     Registry.register_and_bind(configuration_class=Configuration,
-                               configuration_constructor=Configuration.get_default,
                                component_class=Component,
                                name='config_b',
                                namespace='testing')
     Registry.register_and_bind(configuration_class=Configuration,
-                               configuration_constructor=Configuration.get_default,
                                component_class=Component,
                                name='config_c',
                                namespace='testing')
@@ -256,9 +253,14 @@ class ConfigD(Configuration):
     ):
         config = super().get_default()
 
-        config.add_short(name='param_1', value=True, type_hint=bool, variants=[False, True])
-        config.add_short(name='child', value=RegistrationKey(name='config_e',
-                                                             namespace='testing'), is_registration=True)
+        config.add_short(name='param_1',
+                         value=True,
+                         type_hint=bool,
+                         variants=[False, True])
+        config.add_short(name='child',
+                         value=RegistrationKey(name='config_e',
+                                               namespace='testing'),
+                         is_registration=True)
         return config
 
 
@@ -271,7 +273,10 @@ class ConfigE(Configuration):
     ):
         config = super().get_default()
 
-        config.add_short(name='param_1', value=1, type_hint=int, variants=[1, 2])
+        config.add_short(name='param_1',
+                         value=1,
+                         type_hint=int,
+                         variants=[1, 2])
 
         return config
 
@@ -288,20 +293,21 @@ class ConfigE(Configuration):
 def test_nested_configuration_variants_with_allow_2(
         reset_registry
 ):
-    Registry.queue_register_and_bind_variants(configuration_class=ConfigD,
-                                              component_class=Component,
-                                              name='config_d',
-                                              namespace='testing',
-                                              parameter_variants_only=False,
-                                              allow_parameter_variants=True)
-    Registry.register_and_bind(configuration_class=ConfigE,
-                               configuration_constructor=Configuration.get_default,
-                               component_class=Component,
-                               name='config_e',
-                               namespace='testing')
-    variant_keys = Registry.register_and_bind_queued_variants()
+    Registry.add_and_bind_variants(config_class=ConfigD,
+                                   component_class=Component,
+                                   name='config_d',
+                                   namespace='testing',
+                                   parameter_variants_only=False,
+                                   allow_parameter_variants=True)
+    Registry.add_and_bind(config_class=ConfigE,
+                          config_constructor=Configuration.get_default,
+                          component_class=Component,
+                          name='config_e',
+                          namespace='testing')
+    Registry.check_registration_graph()
+    Registry.expand_and_resolve_registration()
 
-    assert len(variant_keys) == 2
+    assert len(Registry.REGISTRY) == 4
 
 
 class ConfigF(Configuration):

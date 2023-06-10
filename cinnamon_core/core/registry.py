@@ -348,6 +348,9 @@ class Registry:
                     Registry.import_and_load_registrations(spec=spec)
                     Registry.REGISTER_SCOPE = None
 
+        Registry.check_registration_graph()
+        Registry.expand_and_resolve_registration()
+
     @staticmethod
     def import_and_load_registrations(
             spec
@@ -360,12 +363,6 @@ class Registry:
         if new_methods_size > previous_methods_size:
             for method in Registry.REGISTRATION_METHODS[previous_methods_size:]:
                 method()
-
-    @staticmethod
-    def is_custom_module(
-            module_path: Union[AnyStr, Path]
-    ) -> bool:
-        return module_path.name not in sys.modules
 
     @staticmethod
     def try_resolve_module_from_namespace(
@@ -673,7 +670,7 @@ class Registry:
 
     ) -> bool:
         isolated_nodes = list(nx.isolates(Registry.DEPENDENCY_DAG))
-        if len(isolated_nodes) > 0:
+        if len(isolated_nodes) > 0 and len(Registry.DEPENDENCY_DAG.nodes) > 1:
             raise DisconnectedGraphException(nodes=isolated_nodes)
 
         if not nx.algorithms.dag.is_directed_acyclic_graph(Registry.DEPENDENCY_DAG):
@@ -1121,7 +1118,6 @@ class Registry:
                                        namespace=namespace)
 
         variants = config_class.variants
-
         if not parameter_variants_only and config_constructor == config_class.get_default:
             new_registered_conf_keys = []
             for variant in variants:
@@ -1170,27 +1166,46 @@ class Registry:
                     if param.is_registration and not param.is_calibration}
 
         # Add variants to each registration child iff no variants have been specified
-        for child_key, child in children.items():
-            if child.variants is None and child.value is not None:
-                child_regr_key = child.value
-                child_config_info = Registry.retrieve_configurations_from_key(config_registration_key=child_regr_key,
+        for child_name, child in children.items():
+            child_key = child.value
+            child_variants = []
+            if child_key is not None:
+                child_config_info = Registry.retrieve_configurations_from_key(config_registration_key=child_key,
                                                                               exact_match=True)
-
-                if child_regr_key not in Registry.BINDINGS:
-                    raise NotBoundException(registration_key=child_regr_key)
-                child_component_class = Registry.BINDINGS[child_regr_key]
-
-                child_variants = Registry.register_and_bind_variants(
+                if child_key not in Registry.BINDINGS:
+                    raise NotBoundException(registration_key=child_key)
+                child_component_class = Registry.BINDINGS[child_key]
+                child_variants.extend(Registry.register_and_bind_variants(
                     config_class=child_config_info.class_type,
                     component_class=child_component_class,
-                    name=child_regr_key.name,
-                    tags=child_regr_key.tags,
-                    namespace=child_regr_key.namespace,
+                    name=child_key.name,
+                    tags=child_key.tags,
+                    namespace=child_key.namespace,
                     parameter_variants_only=parameter_variants_only,
                     allow_parameter_variants=allow_parameter_variants,
                     config_constructor=child_config_info.constructor,
-                    config_kwargs=child_config_info.kwargs)
-                built_config.get(child_key).variants = child_variants
+                    config_kwargs=child_config_info.kwargs))
+
+            if child.variants is not None:
+                for variant in child.variants:
+                    variant_config_info = Registry.retrieve_configurations_from_key(config_registration_key=variant,
+                                                                                    exact_match=True)
+                    if variant not in Registry.BINDINGS:
+                        raise NotBoundException(registration_key=variant)
+                    variant_component_class = Registry.BINDINGS[variant]
+                    child_variants.extend(Registry.register_and_bind_variants(
+                        config_class=variant_config_info.class_type,
+                        component_class=variant_component_class,
+                        name=variant.name,
+                        tags=variant.tags,
+                        namespace=variant.namespace,
+                        parameter_variants_only=parameter_variants_only,
+                        allow_parameter_variants=allow_parameter_variants,
+                        config_constructor=variant_config_info.constructor,
+                        config_kwargs=variant_config_info.kwargs))
+
+            child_variants = list(set(child_variants))
+            built_config.get(child_name).variants = child_variants + child.variants if child.variants is not None else child_variants
 
         # Register each combination of parameter variants
         parameter_combinations = built_config.get_variants_combinations()
@@ -1204,7 +1219,7 @@ class Registry:
                                                                 exact_match=True,
                                                                 strict=False)
             if retrieved_config is not None:
-                return None
+                return []
             else:
                 # Register configuration
                 Registry.register_and_bind(configuration_class=config_class,
@@ -1213,7 +1228,7 @@ class Registry:
                                            name=name,
                                            tags=tags if not is_variant else tags.union({variant_name}),
                                            namespace=namespace)
-                return None
+                return []
 
         # Register each combination
         new_registered_conf_keys = []
@@ -1308,6 +1323,22 @@ class Registry:
             Registry.DEPENDENCY_DAG.add_node(main_key)
             Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, main_key)
 
+        variants = config_class.variants
+        for variant in variants:
+            variant_tags = tags.union({variant.name}) if tags is not None else {variant.name}
+            variant_key = RegistrationKey(name=name,
+                                          tags=variant_tags,
+                                          namespace=namespace)
+            all_keys.append(variant_key)
+
+            if not Registry.is_in_graph_from_key(registration_key=variant_key):
+                Registry.DEPENDENCY_DAG.add_node(variant_key)
+
+            Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, variant_key)
+
+            # This is needed to use variants and still ensure they are registered
+            Registry.REGISTRATION_REGISTRY[variant_key] = Registry.REGISTRATION_REGISTRY[main_key]
+
         built_config = config_constructor(**config_kwargs)
 
         variant_name = [variant.name
@@ -1370,16 +1401,24 @@ class Registry:
             if not Registry.is_in_graph_from_key(registration_key=combination_key):
                 Registry.DEPENDENCY_DAG.add_node(combination_key)
             Registry.DEPENDENCY_DAG.add_edge(Registry.ROOT_KEY, combination_key)
+
+            # This is needed to use variants and still ensure they are registered
+            Registry.REGISTRATION_REGISTRY[combination_key] = Registry.REGISTRATION_REGISTRY[main_key]
+
             all_keys.append(combination_key)
 
         return all_keys
 
     @staticmethod
     def expand_and_resolve_registration():
-        topological_sorted = reversed(list(nx.topological_sort(Registry.DEPENDENCY_DAG)))
+        topological_sorted = list(reversed(list(nx.topological_sort(Registry.DEPENDENCY_DAG))))
         for key in topological_sorted:
             if key in Registry.REGISTRATION_REGISTRY:
-                Registry.REGISTRATION_REGISTRY[key]()
+                registration_method = Registry.REGISTRATION_REGISTRY.pop(key)
+                Registry.REGISTRATION_REGISTRY = {key: value for key, value in Registry.REGISTRATION_REGISTRY.items()
+                                                  if value != registration_method}
+                registration_method()
+
 
 
 __all__ = [
@@ -1394,4 +1433,6 @@ __all__ = [
     'AlreadyRegisteredException',
     'InvalidConfigurationTypeException',
     'AlreadyBoundException',
+    'DisconnectedGraphException',
+    'NotADAGException'
 ]

@@ -1,9 +1,10 @@
+from pathlib import Path
 from typing import Type
 
 import pytest
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration, C
+from cinnamon_core.core.configuration import Configuration, C, supports_variants, add_variant
 from cinnamon_core.core.registry import Registry, RegistrationKey, NotADAGException
 
 
@@ -87,8 +88,7 @@ class ConfigB(ConfigA):
 
         config.add_short(name='child',
                          variants=[RegistrationKey(name='config_c', tags={'var1'}, namespace='testing'),
-                                   RegistrationKey(name='config_c', tags={'var2'}, namespace='testing')],
-                         is_registration=True)
+                                   RegistrationKey(name='config_c', tags={'var2'}, namespace='testing')])
 
         return config
 
@@ -100,8 +100,8 @@ def test_one_level_add_variants(
                                    component_class=Component,
                                    name='config',
                                    namespace='testing')
-    assert len(Registry.DEPENDENCY_DAG.nodes) == 10
-    assert len(Registry.DEPENDENCY_DAG.edges) == 9
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 8
+    assert len(Registry.DEPENDENCY_DAG.edges) == 7
     assert Registry.check_registration_graph()
     Registry.expand_and_resolve_registration()
     assert len(Registry.REGISTRY) == 7
@@ -225,3 +225,101 @@ def test_cycle(
                                namespace='testing')
     with pytest.raises(NotADAGException):
         Registry.check_registration_graph()
+
+
+class ConfigH(Configuration):
+
+    @classmethod
+    def get_default(
+            cls: Type[C]
+    ) -> C:
+        config = super().get_default()
+
+        config.add_short(name='child',
+                         value=RegistrationKey(name='test', namespace='external'),
+                         is_registration=True)
+
+        return config
+
+
+def test_external_dependency(
+        reset_registry
+):
+    external_path = Path().absolute().parent.joinpath('tests', 'external_test_repo')
+    Registry.load_registrations(directory_path=external_path)
+
+    Registry.add_configuration(configuration_class=ConfigH,
+                               name='config',
+                               namespace='testing')
+
+    Registry.check_registration_graph()
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 3
+    Registry.expand_and_resolve_registration()
+
+
+@supports_variants
+class ConfigI(Configuration):
+
+    @classmethod
+    def get_default(
+            cls: Type[C]
+    ) -> C:
+        config = super().get_default()
+
+        config.add_short(name='x',
+                         value=5)
+
+        return config
+
+    @classmethod
+    @add_variant(name='var1')
+    def get_var1_variant(
+            cls
+    ):
+        config = cls.get_default()
+        config.x = 10
+        return config
+
+
+def test_configuration_variant(
+        reset_registry
+):
+    Registry.add_and_bind_variants(config_class=ConfigI,
+                                   component_class=Component,
+                                   name='config',
+                                   namespace='testing')
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 3
+    Registry.check_registration_graph()
+    Registry.expand_and_resolve_registration()
+    assert RegistrationKey(name='config', tags={'var1'}, namespace='testing') in Registry.REGISTRY
+
+
+class ConfigJ(Configuration):
+
+    @classmethod
+    def get_default(
+            cls: Type[C]
+    ) -> C:
+        config = super().get_default()
+
+        config.add_short(name='child',
+                         value=RegistrationKey(name='config_i', tags={'var1'}, namespace='testing'),
+                         is_registration=True)
+
+        return config
+
+
+def test_nested_configuration_variant(
+        reset_registry
+):
+    Registry.add_and_bind_variants(config_class=ConfigI,
+                                   component_class=Component,
+                                   name='config_i',
+                                   namespace='testing')
+    Registry.add_and_bind(config_class=ConfigJ,
+                          component_class=Component,
+                          name='config_j',
+                          namespace='testing')
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 4
+    Registry.check_registration_graph()
+    Registry.expand_and_resolve_registration()

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import os
-from copy import deepcopy
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, Optional, Callable, Dict, Type, Set, Union, Iterable, Tuple, Hashable, TypeVar
+from typing import Any, Optional, Callable, Dict, Type, Set, Union, Iterable, Tuple, Hashable, TypeVar, List
 
 from typeguard import check_type
 
@@ -204,8 +203,18 @@ class FieldDict(dict):
     def to_value_dict(
             self
     ):
-        return {key: field.value if type(field.value) != FieldDict else field.value.to_value_dict()
-                for key, field in self.items() if key != 'conditions'}
+        def convert_field(field: Field):
+            try:
+                check_type('field.value', field.value, Union[FieldDict, List[FieldDict]])
+            except TypeError:
+                return field.value
+
+            if type(field.value) == FieldDict:
+                return field.value.to_value_dict()
+            else:
+                return [item.to_value_dict() for item in field.value]
+
+        return {key: convert_field(field) for key, field in self.items() if key != 'conditions'}
 
     def add(
             self,
