@@ -203,13 +203,13 @@ class FieldDict(dict):
     def to_value_dict(
             self
     ):
-        def convert_field(field: Field):
+        def convert_field(field: F):
             try:
-                check_type('field.value', field.value, Union[FieldDict, List[FieldDict]])
+                check_type('field.value', field.value, Union[type(self), List[type(self)]])
             except TypeError:
                 return field.value
 
-            if type(field.value) == FieldDict:
+            if type(field.value) == type(self):
                 return field.value.to_value_dict()
             else:
                 return [item.to_value_dict() for item in field.value]

@@ -455,6 +455,14 @@ class Configuration(FieldDict):
         """
         return cls()
 
+    def to_value_dict(
+            self
+    ):
+        value_dict = super().to_value_dict()
+
+        return {key: value.config.to_value_dict() if isinstance(value, core.component.Component) else value
+                for key, value in value_dict.items()}
+
     def show(
             self
     ):

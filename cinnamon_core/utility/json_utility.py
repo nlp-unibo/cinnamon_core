@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import AnyStr, Any, Union
 
-import jsons
-import simplejson as json
+import jsonpickle as json
+import jsonpickle.ext.numpy as jsonpickle_numpy
+jsonpickle_numpy.register_handlers()
 
-# TODO: fix this
 
 def load_json(
         filepath: Union[AnyStr, Path]
@@ -23,14 +23,15 @@ def load_json(
 
     with filepath.open(mode='r') as f:
         data = f.read()
-    data = jsons.load(data)
+        data = json.decode(data)
 
     return data
 
 
 def save_json(
         filepath: Union[AnyStr, Path],
-        data: Any
+        data: Any,
+        **kwargs
 ):
     """
     Saves data in JSON format to file. Special python objects are
@@ -43,8 +44,8 @@ def save_json(
     filepath = Path(filepath) if type(filepath) != Path else filepath
 
     with filepath.open(mode='w') as f:
-        data = jsons.dump(data)
-        json.dump(data, f, tuple_as_array=False, indent=4)
+        data = json.encode(data, indent=4, **kwargs)
+        f.write(data)
 
 
 __all__ = ['load_json', 'save_json']
