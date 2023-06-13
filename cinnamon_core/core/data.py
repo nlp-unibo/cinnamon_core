@@ -200,6 +200,11 @@ class FieldDict(dict):
 
         return super().__getitem__(item).value if return_value else super().__getitem__(item)
 
+    def __str__(
+            self
+    ) -> str:
+        return str(self.to_value_dict())
+
     def to_value_dict(
             self
     ):
