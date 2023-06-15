@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 from pathlib import Path
 from typing import AnyStr, Any, Iterable, Optional, Dict, Union, TypeVar, Type, cast
 
@@ -120,7 +121,7 @@ class Component:
     def state(
             self
     ) -> FieldDict:
-        return FieldDict(self.__dict__)
+        return FieldDict()
 
     def get_delta_copy(
             self: Type[C],
