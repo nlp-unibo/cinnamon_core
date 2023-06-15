@@ -21,13 +21,13 @@ def test_registration(
     Testing if a ``Configuration`` is registered correctly.
     """
 
-    key = Registry.register_configuration(configuration_class=Configuration,
+    key = Registry.register_configuration(config_class=Configuration,
                                           name='test',
                                           tags={'tag1'},
                                           namespace='testing')
     assert key in Registry.REGISTRY
 
-    config_info = Registry.retrieve_configurations_from_key(config_registration_key=key,
+    config_info = Registry.retrieve_configurations_from_key(registration_key=key,
                                                             exact_match=True)
     assert config_info.class_type == Configuration
     assert config_info.constructor == Configuration.get_default
@@ -43,10 +43,10 @@ def test_repeated_registration(
     key = RegistrationKey(name='test',
                           tags={'tag1'},
                           namespace='testing')
-    Registry.register_configuration_from_key(configuration_class=Configuration,
+    Registry.register_configuration_from_key(config_class=Configuration,
                                              registration_key=key)
     with pytest.raises(AlreadyRegisteredException):
-        Registry.register_configuration_from_key(configuration_class=Configuration,
+        Registry.register_configuration_from_key(config_class=Configuration,
                                                  registration_key=key)
 
 
@@ -56,13 +56,13 @@ def test_invalid_configuration_retrieval(
     registration_key = RegistrationKey(name='test_config',
                                        tags={'tag1', 'tag2'},
                                        namespace='testing')
-    config_info = Registry.retrieve_configurations_from_key(config_registration_key=registration_key,
+    config_info = Registry.retrieve_configurations_from_key(registration_key=registration_key,
                                                             exact_match=True,
                                                             strict=False)
     assert config_info is None
 
     with pytest.raises(NotRegisteredException):
-        Registry.retrieve_configurations_from_key(config_registration_key=registration_key,
+        Registry.retrieve_configurations_from_key(registration_key=registration_key,
                                                   exact_match=True)
 
 
@@ -72,16 +72,16 @@ def test_retrieve_multiple_configurations(
     key1 = RegistrationKey(name='test_config',
                            tags={'tag1'},
                            namespace='testing')
-    Registry.register_configuration_from_key(configuration_class=Configuration,
+    Registry.register_configuration_from_key(config_class=Configuration,
                                              registration_key=key1)
 
     key2 = RegistrationKey(name='test_config',
                            tags={'tag2', 'tag1'},
                            namespace='testing')
-    Registry.register_configuration_from_key(configuration_class=Configuration,
+    Registry.register_configuration_from_key(config_class=Configuration,
                                              registration_key=key2)
 
-    retrieved_configs = Registry.retrieve_configurations_from_key(config_registration_key=key2,
+    retrieved_configs = Registry.retrieve_configurations_from_key(registration_key=key2,
                                                                   exact_match=False)
     assert len(retrieved_configs) == 2
 
@@ -89,32 +89,32 @@ def test_retrieve_multiple_configurations(
 def test_register_and_then_binding(
         reset_registry
 ):
-    key = Registry.register_configuration(configuration_class=Configuration,
+    key = Registry.register_configuration(config_class=Configuration,
                                           name='test',
                                           tags={'tag1'},
                                           namespace='testing')
-    Registry.bind_from_key(config_registration_key=key,
+    Registry.bind_from_key(registration_key=key,
                            component_class=Component)
 
 
 def test_register_and_then_binding_exception(
         reset_registry
 ):
-    key = Registry.register_configuration(configuration_class=Configuration,
+    key = Registry.register_configuration(config_class=Configuration,
                                           name='test',
                                           tags={'tag1'},
                                           namespace='testing')
-    Registry.bind_from_key(config_registration_key=key,
+    Registry.bind_from_key(registration_key=key,
                            component_class=Component)
     with pytest.raises(AlreadyBoundException):
-        Registry.bind_from_key(config_registration_key=key,
+        Registry.bind_from_key(registration_key=key,
                                component_class=Component)
 
 
 def test_register_and_binding(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=Configuration,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='test',
                                tags={'tag'},
@@ -124,13 +124,13 @@ def test_register_and_binding(
 def test_register_and_binding_exception(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=Configuration,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='test',
                                tags={'tag'},
                                namespace='testing')
     with pytest.raises(AlreadyRegisteredException):
-        Registry.register_and_bind(configuration_class=Configuration,
+        Registry.register_and_bind(config_class=Configuration,
                                    component_class=Component,
                                    name='test',
                                    tags={'tag'},
@@ -140,37 +140,37 @@ def test_register_and_binding_exception(
 def test_build_component(
         reset_registry
 ):
-    key = Registry.register_and_bind(configuration_class=Configuration,
+    key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
                                      namespace='testing')
-    component = Registry.build_component_from_key(config_registration_key=key)
+    component = Registry.build_component_from_key(registration_key=key)
     assert type(component) == Component
 
 
 def test_register_built_component(
         reset_registry
 ):
-    key = Registry.register_and_bind(configuration_class=Configuration,
+    key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
                                      namespace='testing')
-    component = Registry.build_component_from_key(config_registration_key=key)
-    Registry.register_built_component_from_key(config_registration_key=key,
+    component = Registry.build_component_from_key(registration_key=key)
+    Registry.register_built_component_from_key(registration_key=key,
                                                component=component)
 
 
 def test_retrieve_built_component(
         reset_registry
 ):
-    key = Registry.register_and_bind(configuration_class=Configuration,
+    key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
                                      namespace='testing')
-    component = Registry.build_component_from_key(config_registration_key=key)
-    Registry.register_built_component_from_key(config_registration_key=key,
+    component = Registry.build_component_from_key(registration_key=key)
+    Registry.register_built_component_from_key(registration_key=key,
                                                component=component)
-    retrieved = Registry.retrieve_built_component_from_key(config_registration_key=key)
+    retrieved = Registry.retrieve_built_component_from_key(registration_key=key)
     assert component == retrieved
 
 
@@ -181,7 +181,7 @@ def test_register_built_component_exception(
     key = RegistrationKey(name='component',
                           namespace='testing')
     with pytest.raises(NotRegisteredException):
-        Registry.register_built_component_from_key(config_registration_key=key,
+        Registry.register_built_component_from_key(registration_key=key,
                                                    component=component)
 
 
@@ -215,10 +215,10 @@ class ConfigA(Configuration):
 def test_register_delta_copy(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=ConfigA,
+    Registry.register_and_bind(config_class=ConfigA,
                                component_class=Component,
-                               configuration_constructor=ConfigA.get_delta_class_copy,
-                               configuration_kwargs={
+                               config_constructor=ConfigA.get_delta_class_copy,
+                               config_kwargs={
                                    'params': {
                                        'x': 10,
                                        'y': 15
@@ -226,7 +226,7 @@ def test_register_delta_copy(
                                },
                                name='config',
                                namespace='testing')
-    component = Registry.build_component_from_key(config_registration_key=RegistrationKey(name='config',
-                                                                                          namespace='testing'))
+    component = Registry.build_component_from_key(registration_key=RegistrationKey(name='config',
+                                                                                   namespace='testing'))
     assert component.x == 10
     assert component.y == 15

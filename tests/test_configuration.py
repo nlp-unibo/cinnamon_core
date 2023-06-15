@@ -116,7 +116,7 @@ def test_variants_validation_exception():
 @pytest.fixture
 def register_component():
     Registry.clear()
-    Registry.register_and_bind(configuration_class=Configuration,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='component',
                                namespace='testing')

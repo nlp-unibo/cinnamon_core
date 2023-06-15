@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from itertools import product
+from typing import Type
 
 import pytest
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration, add_variant, supports_variants
+from cinnamon_core.core.configuration import Configuration, add_variant, supports_variants, C
 from cinnamon_core.core.registry import RegistrationKey, Registry
 
 
@@ -80,15 +81,15 @@ def reset_registry():
 def test_flatten_parameter_variants(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=NestedChild,
+    Registry.register_and_bind(config_class=NestedChild,
                                component_class=Component,
                                name='config_a',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=Configuration,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='config_b',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=Configuration,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='config_c',
                                namespace='testing')
@@ -98,7 +99,7 @@ def test_flatten_parameter_variants(
                                                        name='parent',
                                                        namespace='testing',
                                                        parameter_variants_only=True)
-    assert len(variant_keys) == 4
+    assert len(variant_keys) == 5
     for (param1, param2) in product([False, True], [False, True]):
         assert RegistrationKey(name='parent',
                                tags={f'param_1={param1}', f'param_2={param2}'},
@@ -108,18 +109,15 @@ def test_flatten_parameter_variants(
 def test_flatten_configuration_variants(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=NestedChild,
-                               configuration_constructor=Configuration.get_default,
+    Registry.register_and_bind(config_class=NestedChild,
                                component_class=Component,
                                name='config_a',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=Configuration,
-                               configuration_constructor=Configuration.get_default,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='config_b',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=Configuration,
-                               configuration_constructor=Configuration.get_default,
+    Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='config_c',
                                namespace='testing')
@@ -130,7 +128,7 @@ def test_flatten_configuration_variants(
                                                        namespace='testing',
                                                        parameter_variants_only=False,
                                                        allow_parameter_variants=True)
-    assert len(variant_keys) == 2
+    assert len(variant_keys) == 3
     assert RegistrationKey(name='parent', tags={'variant1'}, namespace='testing') in variant_keys
     assert RegistrationKey(name='parent', tags={'variant2'}, namespace='testing') in variant_keys
 
@@ -180,13 +178,13 @@ class ConfigC(Configuration):
 def test_nested_parameter_variants(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=ConfigB,
-                               configuration_constructor=ConfigB.get_default,
+    Registry.register_and_bind(config_class=ConfigB,
+                               config_constructor=ConfigB.get_default,
                                component_class=Component,
                                name='config_b',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=ConfigC,
-                               configuration_constructor=ConfigC.get_default,
+    Registry.register_and_bind(config_class=ConfigC,
+                               config_constructor=ConfigC.get_default,
                                component_class=Component,
                                name='config_c',
                                namespace='testing')
@@ -196,19 +194,19 @@ def test_nested_parameter_variants(
                                                        name='config_a',
                                                        namespace='testing',
                                                        parameter_variants_only=True)
-    assert len(variant_keys) == 8
+    assert len(variant_keys) == 9
 
 
 def test_nested_configuration_variants(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=ConfigB,
-                               configuration_constructor=ConfigB.get_default,
+    Registry.register_and_bind(config_class=ConfigB,
+                               config_constructor=ConfigB.get_default,
                                component_class=Component,
                                name='config_b',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=ConfigC,
-                               configuration_constructor=ConfigC.get_default,
+    Registry.register_and_bind(config_class=ConfigC,
+                               config_constructor=ConfigC.get_default,
                                component_class=Component,
                                name='config_c',
                                namespace='testing')
@@ -219,19 +217,19 @@ def test_nested_configuration_variants(
                                                        namespace='testing',
                                                        parameter_variants_only=False,
                                                        allow_parameter_variants=False)
-    assert len(variant_keys) == 0
+    assert len(variant_keys) == 1
 
 
 def test_nested_configuration_variants_with_allow(
         reset_registry
 ):
-    Registry.register_and_bind(configuration_class=ConfigB,
-                               configuration_constructor=ConfigB.get_default,
+    Registry.register_and_bind(config_class=ConfigB,
+                               config_constructor=ConfigB.get_default,
                                component_class=Component,
                                name='config_b',
                                namespace='testing')
-    Registry.register_and_bind(configuration_class=ConfigC,
-                               configuration_constructor=ConfigC.get_default,
+    Registry.register_and_bind(config_class=ConfigC,
+                               config_constructor=ConfigC.get_default,
                                component_class=Component,
                                name='config_c',
                                namespace='testing')
@@ -242,7 +240,7 @@ def test_nested_configuration_variants_with_allow(
                                                        namespace='testing',
                                                        parameter_variants_only=False,
                                                        allow_parameter_variants=True)
-    assert len(variant_keys) == 8
+    assert len(variant_keys) == 9
 
 
 class ConfigD(Configuration):
@@ -334,4 +332,4 @@ def test_variants_with_conditions(
                                                        name='config_f',
                                                        namespace='testing',
                                                        parameter_variants_only=True)
-    assert len(variant_keys) == 2
+    assert len(variant_keys) == 3

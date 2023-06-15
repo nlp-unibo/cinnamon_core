@@ -16,7 +16,7 @@ def reset_registry():
 def test_add_configuration(
         reset_registry
 ):
-    Registry.add_configuration(configuration_class=Configuration,
+    Registry.add_configuration(config_class=Configuration,
                                name='config',
                                namespace='testing')
     assert len(Registry.DEPENDENCY_DAG.nodes) == 2
@@ -28,7 +28,7 @@ def test_add_configuration(
 def test_expand_and_resolve_single_configuration(
         reset_registry
 ):
-    Registry.add_configuration(configuration_class=Configuration,
+    Registry.add_configuration(config_class=Configuration,
                                name='config',
                                namespace='testing')
     Registry.expand_and_resolve_registration()
@@ -217,10 +217,10 @@ class ConfigG(Configuration):
 def test_cycle(
         reset_registry
 ):
-    Registry.add_configuration(configuration_class=ConfigF,
+    Registry.add_configuration(config_class=ConfigF,
                                name='config_f',
                                namespace='testing')
-    Registry.add_configuration(configuration_class=ConfigG,
+    Registry.add_configuration(config_class=ConfigG,
                                name='config_g',
                                namespace='testing')
     with pytest.raises(NotADAGException):
@@ -248,7 +248,7 @@ def test_external_dependency(
     external_path = Path().absolute().parent.joinpath('tests', 'external_test_repo')
     Registry.load_registrations(directory_path=external_path)
 
-    Registry.add_configuration(configuration_class=ConfigH,
+    Registry.add_configuration(config_class=ConfigH,
                                name='config',
                                namespace='testing')
 

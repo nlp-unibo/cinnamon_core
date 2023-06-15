@@ -28,12 +28,16 @@ class VariantSpec:
         method: a pointer to the decorated method
     """
     name: str
+    tags: core.registry.Tag
+    namespace: Optional[str]
     method: Constructor
     class_name: str
 
 
 def add_variant(
-        name: Optional[str] = None
+        name: Optional[str] = None,
+        tags: core.registry.Tag = None,
+        namespace: Optional[str] = None
 ) -> Callable[[Constructor], Constructor]:
     """
     Marks a ``Configuration`` method as a ``Configuration`` variant.
@@ -42,6 +46,8 @@ def add_variant(
 
     Args:
         name: unique identifier of the ``Configuration`` variant.
+        tags: TODO
+        namespace: TODO
 
     Returns:
         The decorated ``Configuration`` method.
@@ -53,6 +59,8 @@ def add_variant(
     ) -> Constructor:
         method.variant = True
         method.variant_name = name if name is not None else method.__name__
+        method.tags = tags
+        method.namespace = namespace
         method.class_name = method.__qualname__.split('.')[0]
         return method
 
@@ -80,8 +88,14 @@ def supports_variants(
 
         if getattr(method, "variant", False):
             variant_name = getattr(method, 'variant_name', None)
+            tags = getattr(method, 'tags', None)
+            namespace = getattr(method, 'namespace', None)
             class_name = getattr(method, 'class_name', None)
-            variants.append(VariantSpec(name=variant_name, method=method, class_name=class_name))
+            variants.append(VariantSpec(name=variant_name,
+                                        method=method,
+                                        class_name=class_name,
+                                        tags=tags,
+                                        namespace=namespace))
     cls.variants = tuple(variants)
     return cls
 
@@ -221,6 +235,7 @@ class Configuration(FieldDict):
 
     def get_variants_combinations(
             self,
+            registrations_only: bool = False
     ) -> List[Dict[str, Any]]:
         """
         Gets all possible ``Configuration`` variant combinations of current ``Configuration``
@@ -228,6 +243,9 @@ class Configuration(FieldDict):
         There exist two different methods to specify variants
         - ``Parameter``-based: via ``variants`` field of ``Parameter``
         - ``Configuration``-based: via ``@supports_variants`` and ``@add_variant`` decorators
+
+        Args:
+            registrations_only: TODO
 
         Returns:
             List of variant combinations.
@@ -237,7 +255,8 @@ class Configuration(FieldDict):
         parameters = {}
         for param_key, param in self.items():
             if param.variants is not None and len(param.variants):
-                parameters[param_key] = param.variants
+                if (registrations_only and param.is_registration) or not registrations_only:
+                    parameters[param_key] = param.variants
         combinations = get_dict_values_combinations(params_dict=parameters)
         return [comb for comb in combinations if self.get_delta_copy(params=comb).validate(strict=False).passed]
 
@@ -356,14 +375,14 @@ class Configuration(FieldDict):
                 serialization_id += 1
                 if type(param.value) == core.registry.RegistrationKey:
                     param.value = core.registry.Registry.build_component_from_key(
-                        config_registration_key=param.value,
+                        registration_key=param.value,
                         build_args={'serialization_id': serialization_id})
                 else:
                     try:
                         components = []
                         for key in param.value:
                             component = core.registry.Registry.build_component_from_key(
-                                config_registration_key=key,
+                                registration_key=key,
                                 build_args={'serialization_id': serialization_id})
                             components.append(component)
                             serialization_id += 1

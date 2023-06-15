@@ -196,7 +196,7 @@ class Component:
         """
 
         component = core.registry.Registry.build_component_from_key(
-            config_registration_key=config_registration_key,
+            registration_key=config_registration_key,
             register_built_component=register_built_component,
             build_args=build_args)
         check_type('component', component, cls)
@@ -261,7 +261,7 @@ class Component:
         """
 
         component = core.registry.Registry.retrieve_built_component_from_key(
-            config_registration_key=config_registration_key)
+            registration_key=config_registration_key)
         check_type('component', component, cls)
         component = cast(type(cls), component)
         return component

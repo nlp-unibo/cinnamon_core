@@ -13,11 +13,11 @@ def reset_registry():
 def test_build_component(
         reset_registry
 ):
-    key = Registry.register_and_bind(configuration_class=Configuration,
+    key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
                                      namespace='testing')
-    component = Registry.build_component_from_key(config_registration_key=key)
+    component = Registry.build_component_from_key(registration_key=key)
     assert type(component) == Component
     assert type(component.config) == Configuration
 
@@ -25,11 +25,11 @@ def test_build_component(
 def test_delta_copy(
         reset_registry
 ):
-    key = Registry.register_and_bind(configuration_class=Configuration,
+    key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
                                      namespace='testing')
-    component = Registry.build_component_from_key(config_registration_key=key)
+    component = Registry.build_component_from_key(registration_key=key)
 
     delta_copy: Component = component.get_delta_copy()
     assert component != delta_copy
