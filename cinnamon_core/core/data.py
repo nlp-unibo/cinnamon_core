@@ -141,11 +141,11 @@ class FieldDict(dict):
         for arg in args:
             if isinstance(arg, dict):
                 for k, v in arg.items():
-                    self.add_short(name=k, value=v, type_hint=type(v))
+                    self.add(name=k, value=v, type_hint=type(v))
 
         if kwargs:
             for k, v in kwargs.items():
-                self.add_short(name=k, value=v, type_hint=type(v))
+                self.add(name=k, value=v, type_hint=type(v))
 
     def __getattr__(
             self,
@@ -221,7 +221,7 @@ class FieldDict(dict):
 
         return {key: convert_field(field) for key, field in self.items() if key != 'conditions'}
 
-    def add(
+    def _add(
             self,
             field: Field
     ):
@@ -254,7 +254,7 @@ class FieldDict(dict):
                                                                 field_name=field.name,
                                                                 type_hint=field.type_hint)(fields))
 
-    def add_short(
+    def add(
             self,
             name: Hashable,
             value: Any = None,
@@ -278,7 +278,7 @@ class FieldDict(dict):
                       type_hint=type_hint,
                       description=description,
                       tags=tags)
-        self.add(field=field)
+        self._add(field=field)
 
     def add_condition(
             self,
@@ -297,10 +297,10 @@ class FieldDict(dict):
         """
         # Add conditions if first time
         if 'conditions' not in self:
-            self.add_short(name='conditions',
-                           value={},
-                           type_hint=Dict[str, Callable[[FieldDict], bool]],
-                           description='Stores conditions (callable boolean evaluators) '
+            self.add(name='conditions',
+                     value={},
+                     type_hint=Dict[str, Callable[[FieldDict], bool]],
+                     description='Stores conditions (callable boolean evaluators) '
                                        'that are used to assess the validity and correctness of this ParameterDict')
 
         if name is None:

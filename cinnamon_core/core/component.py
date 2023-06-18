@@ -113,7 +113,7 @@ class Component:
             for key, value in loaded_state.items():
                 if key == 'config':
                     for param_key, param in value.items():
-                        self.config.add(param)
+                        self.config._add(param)
                 elif hasattr(self, key):
                     setattr(self, key, value)
 
@@ -173,7 +173,7 @@ class Component:
     @classmethod
     def build_component_from_key(
             cls: Type[C],
-            config_registration_key: core.registry.Registration,
+            registration_key: core.registry.Registration,
             register_built_component: bool = False,
             build_args: Optional[Dict] = None
     ) -> C:
@@ -181,7 +181,7 @@ class Component:
         Syntactic sugar for building a ``Component`` from a ``RegistrationKey``.
 
         Args:
-            config_registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
+            registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
             register_built_component: if True, it automatically registers the built ``Component`` in the registry.
             build_args
 
@@ -197,7 +197,7 @@ class Component:
         """
 
         component = core.registry.Registry.build_component_from_key(
-            registration_key=config_registration_key,
+            registration_key=registration_key,
             register_built_component=register_built_component,
             build_args=build_args)
         check_type('component', component, cls)
@@ -248,21 +248,21 @@ class Component:
     @classmethod
     def retrieve_built_component_from_key(
             cls: Type[C],
-            config_registration_key: core.registry.Registration
+            registration_key: core.registry.Registration
     ) -> C:
         """
         Syntactic sugar for retrieving a built ``Component`` instance from its corresponding ``Configuration``
          ``RegistrationKey``.
 
         Args:
-            config_registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
+            registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
 
         Returns:
             The built ``Component`` instance
         """
 
         component = core.registry.Registry.retrieve_built_component_from_key(
-            registration_key=config_registration_key)
+            registration_key=registration_key)
         check_type('component', component, cls)
         component = cast(type(cls), component)
         return component

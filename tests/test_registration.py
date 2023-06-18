@@ -190,6 +190,7 @@ def test_retrieve_external_configurations(
 ):
     external_path = Path().absolute().parent.joinpath('tests', 'external_test_repo')
     Registry.load_registrations(directory_path=external_path)
+    Registry.expand_and_resolve_registration()
     component = Registry.build_component(name='test',
                                          namespace='external')
     assert isinstance(component, Component)
@@ -203,12 +204,12 @@ class ConfigA(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='x',
-                         value=5,
-                         type_hint=int)
-        config.add_short(name='y',
-                         value=10,
-                         type_hint=int)
+        config.add(name='x',
+                   value=5,
+                   type_hint=int)
+        config.add(name='y',
+                   value=10,
+                   type_hint=int)
         return config
 
 

@@ -4,8 +4,8 @@ from typing import Type
 import pytest
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration, C, supports_variants, add_variant
-from cinnamon_core.core.registry import Registry, RegistrationKey, NotADAGException
+from cinnamon_core.core.configuration import Configuration, C
+from cinnamon_core.core.registry import Registry, RegistrationKey, DisconnectedGraphException
 
 
 @pytest.fixture
@@ -60,9 +60,9 @@ class ConfigA(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='param',
-                         value=5,
-                         variants=[10, 15, 20])
+        config.add(name='param',
+                   value=5,
+                   variants=[10, 15, 20])
 
         return config
 
@@ -74,8 +74,8 @@ def test_flat_add_variants(
                                    component_class=Component,
                                    name='config',
                                    namespace='testing')
-    assert len(Registry.DEPENDENCY_DAG.nodes) == 5
-    assert len(Registry.DEPENDENCY_DAG.edges) == 4
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 2
+    assert len(Registry.DEPENDENCY_DAG.edges) == 1
 
 
 class ConfigB(ConfigA):
@@ -86,9 +86,9 @@ class ConfigB(ConfigA):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='child',
-                         variants=[RegistrationKey(name='config_c', tags={'var1'}, namespace='testing'),
-                                   RegistrationKey(name='config_c', tags={'var2'}, namespace='testing')])
+        config.add(name='child',
+                   variants=[RegistrationKey(name='config_c', tags={'var1'}, namespace='testing'),
+                             RegistrationKey(name='config_c', tags={'var2'}, namespace='testing')])
 
         return config
 
@@ -100,8 +100,8 @@ def test_one_level_add_variants(
                                    component_class=Component,
                                    name='config',
                                    namespace='testing')
-    assert len(Registry.DEPENDENCY_DAG.nodes) == 8
-    assert len(Registry.DEPENDENCY_DAG.edges) == 7
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 2
+    assert len(Registry.DEPENDENCY_DAG.edges) == 1
     assert Registry.check_registration_graph()
     Registry.expand_and_resolve_registration()
     assert len(Registry.REGISTRY) == 7
@@ -115,13 +115,13 @@ class ConfigC(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='x',
-                         value=1,
-                         type_hint=int,
-                         variants=[1, 2, 3, 4])
-        config.add_short(name='child',
-                         value=RegistrationKey(name='config_d', namespace='testing'),
-                         is_registration=True)
+        config.add(name='x',
+                   value=1,
+                   type_hint=int,
+                   variants=[1, 2, 3, 4])
+        config.add(name='child',
+                   value=RegistrationKey(name='config_d', namespace='testing'),
+                   is_registration=True)
 
         return config
 
@@ -134,13 +134,13 @@ class ConfigD(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='y',
-                         value=False,
-                         type_hint=bool,
-                         variants=[False, True])
-        config.add_short(name='child',
-                         value=RegistrationKey(name='config_e', namespace='testing'),
-                         is_registration=True)
+        config.add(name='y',
+                   value=False,
+                   type_hint=bool,
+                   variants=[False, True])
+        config.add(name='child',
+                   value=RegistrationKey(name='config_e', namespace='testing'),
+                   is_registration=True)
 
         return config
 
@@ -153,10 +153,10 @@ class ConfigE(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='z',
-                         value=5,
-                         type_hint=int,
-                         variants=[5, 25, 100])
+        config.add(name='z',
+                   value=5,
+                   type_hint=int,
+                   variants=[5, 25, 100])
         return config
 
 
@@ -167,13 +167,13 @@ def test_two_level_add_variants(
                                    component_class=Component,
                                    name='config_c',
                                    namespace='testing')
-    assert len(Registry.DEPENDENCY_DAG.nodes) == 7
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 3
     assert Registry.check_registration_graph()
     Registry.add_and_bind_variants(config_class=ConfigD,
                                    component_class=Component,
                                    name='config_d',
                                    namespace='testing')
-    assert len(Registry.DEPENDENCY_DAG.nodes) == 10
+    assert len(Registry.DEPENDENCY_DAG.nodes) == 4
     assert Registry.check_registration_graph()
     Registry.add_and_bind(config_class=ConfigE,
                           component_class=Component,
@@ -192,9 +192,9 @@ class ConfigF(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='child',
-                         value=RegistrationKey(name='config_g', namespace='testing'),
-                         is_registration=True)
+        config.add(name='child',
+                   value=RegistrationKey(name='config_g', namespace='testing'),
+                   is_registration=True)
 
         return config
 
@@ -207,9 +207,9 @@ class ConfigG(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='child',
-                         value=RegistrationKey(name='config_f', namespace='testing'),
-                         is_registration=True)
+        config.add(name='child',
+                   value=RegistrationKey(name='config_f', namespace='testing'),
+                   is_registration=True)
 
         return config
 
@@ -223,7 +223,7 @@ def test_cycle(
     Registry.add_configuration(config_class=ConfigG,
                                name='config_g',
                                namespace='testing')
-    with pytest.raises(NotADAGException):
+    with pytest.raises(DisconnectedGraphException):
         Registry.check_registration_graph()
 
 
@@ -235,9 +235,9 @@ class ConfigH(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='child',
-                         value=RegistrationKey(name='test', namespace='external'),
-                         is_registration=True)
+        config.add(name='child',
+                   value=RegistrationKey(name='test', namespace='external'),
+                   is_registration=True)
 
         return config
 
@@ -257,7 +257,6 @@ def test_external_dependency(
     Registry.expand_and_resolve_registration()
 
 
-@supports_variants
 class ConfigI(Configuration):
 
     @classmethod
@@ -266,32 +265,10 @@ class ConfigI(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='x',
-                         value=5)
+        config.add(name='x',
+                   value=5)
 
         return config
-
-    @classmethod
-    @add_variant(name='var1')
-    def get_var1_variant(
-            cls
-    ):
-        config = cls.get_default()
-        config.x = 10
-        return config
-
-
-def test_configuration_variant(
-        reset_registry
-):
-    Registry.add_and_bind_variants(config_class=ConfigI,
-                                   component_class=Component,
-                                   name='config',
-                                   namespace='testing')
-    assert len(Registry.DEPENDENCY_DAG.nodes) == 3
-    Registry.check_registration_graph()
-    Registry.expand_and_resolve_registration()
-    assert RegistrationKey(name='config', tags={'var1'}, namespace='testing') in Registry.REGISTRY
 
 
 class ConfigJ(Configuration):
@@ -302,9 +279,9 @@ class ConfigJ(Configuration):
     ) -> C:
         config = super().get_default()
 
-        config.add_short(name='child',
-                         value=RegistrationKey(name='config_i', tags={'var1'}, namespace='testing'),
-                         is_registration=True)
+        config.add(name='child',
+                   value=RegistrationKey(name='config_i', tags={'var1'}, namespace='testing'),
+                   is_registration=True)
 
         return config
 

@@ -3,14 +3,13 @@ from __future__ import annotations
 import inspect
 import os
 from copy import deepcopy
-from dataclasses import dataclass
 from functools import partial
-from typing import Dict, Any, Callable, Optional, Tuple, TypeVar, Hashable, Type, Iterable, List, Set
+from typing import Dict, Any, Callable, Optional, TypeVar, Hashable, Type, Iterable, List, Set
 
 from typeguard import check_type
 
 from cinnamon_core import core
-from cinnamon_core.core.data import FieldDict, Parameter, ValidationResult, ValidationFailureException
+from cinnamon_core.core.data import FieldDict, Parameter, ValidationResult, ValidationFailureException, F
 from cinnamon_core.utility import logging_utility
 from cinnamon_core.utility.python_utility import get_dict_values_combinations
 
@@ -18,90 +17,7 @@ C = TypeVar('C', bound='Configuration')
 Constructor = Callable[[Any], C]
 
 
-@dataclass
-class VariantSpec:
-    """
-    Utility dataclass that stores the decorated method and its variant name.
-
-    Args:
-        name: the specified variant name in the ``@add_variant`` decorator
-        method: a pointer to the decorated method
-    """
-    name: str
-    tags: core.registry.Tag
-    namespace: Optional[str]
-    method: Constructor
-    class_name: str
-
-
-def add_variant(
-        name: Optional[str] = None,
-        tags: core.registry.Tag = None,
-        namespace: Optional[str] = None
-) -> Callable[[Constructor], Constructor]:
-    """
-    Marks a ``Configuration`` method as a ``Configuration`` variant.
-    A ``Configuration`` variant is a method that returns a ``Configuration`` instance
-    (e.g., ``Configuration.get_default()``).
-
-    Args:
-        name: unique identifier of the ``Configuration`` variant.
-        tags: TODO
-        namespace: TODO
-
-    Returns:
-        The decorated ``Configuration`` method.
-    """
-
-    def _add_variant(
-            method: Constructor,
-
-    ) -> Constructor:
-        method.variant = True
-        method.variant_name = name if name is not None else method.__name__
-        method.tags = tags
-        method.namespace = namespace
-        method.class_name = method.__qualname__.split('.')[0]
-        return method
-
-    return _add_variant
-
-
-# TODO: make it a metaclass to allow inheritance
-def supports_variants(
-        cls
-):
-    """
-    Class-level decorator that makes a class sensitive to ``@add_variant`` decorated methods.
-    This decorator checks for all ``@add_variant`` decorated methods and stores their list in a class-level attribute.
-
-    Args:
-        cls: the ``Configuration`` class
-
-    Returns:
-        The decorated ``Configuration`` class
-    """
-    variants = list(getattr(cls, 'variants', ()))
-    for method in cls.__dict__.values():
-        if isinstance(method, classmethod) or isinstance(method, staticmethod):
-            method = method.__func__
-
-        if getattr(method, "variant", False):
-            variant_name = getattr(method, 'variant_name', None)
-            tags = getattr(method, 'tags', None)
-            namespace = getattr(method, 'namespace', None)
-            class_name = getattr(method, 'class_name', None)
-            variants.append(VariantSpec(name=variant_name,
-                                        method=method,
-                                        class_name=class_name,
-                                        tags=tags,
-                                        namespace=namespace))
-    cls.variants = tuple(variants)
-    return cls
-
-
 # TODO: re-integrate search APIs?
-@supports_variants
 class Configuration(FieldDict):
     """
     Generic Configuration class.
@@ -110,8 +26,6 @@ class Configuration(FieldDict):
 
     Differently from a ``FieldDict`` a ``Configuration`` is a extended dictionary that is specific to ``Component``.
     """
-
-    variants: Tuple[VariantSpec] = tuple()
 
     def __setitem__(
             self,
@@ -126,7 +40,15 @@ class Configuration(FieldDict):
             self.get(key).value = item
         self.get(key).in_allowed_range()
 
-    def add(
+    @property
+    def children(
+            self
+    ) -> Dict[str, F]:
+        return {param_key: param
+                for param_key, param in self.items()
+                if param.is_registration and not param.is_calibration}
+
+    def _add(
             self,
             param: Parameter
     ):
@@ -183,7 +105,7 @@ class Configuration(FieldDict):
             self.add_condition(name=f'{param.name}_valid_variants',
                                condition=lambda p: len(p.get(param.name).variants) > 0)
 
-    def add_short(
+    def add(
             self,
             name: str,
             value: Optional[Any] = None,
@@ -231,7 +153,7 @@ class Configuration(FieldDict):
                           build_from_registration=build_from_registration,
                           build_type_hint=build_type_hint,
                           variants=variants)
-        return self.add(param=param)
+        return self._add(param=param)
 
     def get_variants_combinations(
             self,
@@ -302,11 +224,11 @@ class Configuration(FieldDict):
 
         # Add conditions if first time
         if 'conditions' not in self:
-            self.add_short(name='conditions',
-                           value={},
-                           type_hint=Dict[str, Dict[str, Callable[[Configuration], bool]]],
-                           description='Stores conditions (callable boolean evaluators) '
-                                       'that are used to assess the validity and correctness of this ParameterDict')
+            self.add(name='conditions',
+                     value={},
+                     type_hint=Dict[str, Dict[str, Callable[[Configuration], bool]]],
+                     description='Stores conditions (callable boolean evaluators) '
+                                 'that are used to assess the validity and correctness of this ParameterDict')
 
         if name is None:
             name = f'condition_{len(self.conditions) + 1}'
@@ -493,4 +415,4 @@ class Configuration(FieldDict):
         logging_utility.logger.info(parameters_repr)
 
 
-__all__ = ['add_variant', 'supports_variants', 'Configuration', 'ValidationFailureException', 'C']
+__all__ = ['Configuration', 'ValidationFailureException', 'C']

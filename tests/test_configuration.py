@@ -12,10 +12,10 @@ from cinnamon_core.core.registry import RegistrationKey, Registry
 @pytest.fixture
 def define_configuration():
     config = Configuration()
-    config.add_short(name='x',
-                     value=10,
-                     type_hint=int,
-                     description='a parameter')
+    config.add(name='x',
+               value=10,
+               type_hint=int,
+               description='a parameter')
     return config
 
 
@@ -68,22 +68,22 @@ def test_type_hint_validation_strict(define_configuration):
 
 def test_required_validation():
     config = Configuration()
-    config.add_short(name='x',
-                     is_required=True,
-                     type_hint=int,
-                     description='a parameter')
+    config.add(name='x',
+               is_required=True,
+               type_hint=int,
+               description='a parameter')
     with pytest.raises(ValidationFailureException):
         config.validate()
 
 
 def test_allowed_range_validation():
     config = Configuration()
-    config.add_short(name='x',
-                     value=5,
-                     is_required=True,
-                     type_hint=int,
-                     allowed_range=lambda value: value in [1, 2, 3, 4, 5],
-                     description='a parameter')
+    config.add(name='x',
+               value=5,
+               is_required=True,
+               type_hint=int,
+               allowed_range=lambda value: value in [1, 2, 3, 4, 5],
+               description='a parameter')
     config.validate()
 
     with pytest.raises(OutOfRangeParameterValueException):
@@ -92,23 +92,23 @@ def test_allowed_range_validation():
 
 def test_variants_validation():
     config = Configuration()
-    config.add_short(name='x',
-                     value=5,
-                     is_required=True,
-                     type_hint=int,
-                     variants=[1, 2, 3, 4, 5],
-                     description='a parameter')
+    config.add(name='x',
+               value=5,
+               is_required=True,
+               type_hint=int,
+               variants=[1, 2, 3, 4, 5],
+               description='a parameter')
     config.validate()
 
 
 def test_variants_validation_exception():
     config = Configuration()
-    config.add_short(name='x',
-                     value=5,
-                     is_required=True,
-                     type_hint=int,
-                     variants=[],
-                     description='a parameter')
+    config.add(name='x',
+               value=5,
+               is_required=True,
+               type_hint=int,
+               variants=[],
+               description='a parameter')
     with pytest.raises(ValidationFailureException):
         config.validate()
 
@@ -126,10 +126,10 @@ def test_registration(
         register_component
 ):
     config = Configuration()
-    config.add_short(name='child',
-                     value=RegistrationKey(name='component',
+    config.add(name='child',
+               value=RegistrationKey(name='component',
                                            namespace='testing'),
-                     is_registration=True)
+               is_registration=True)
     config.validate()
 
 
@@ -137,11 +137,11 @@ def test_registration_post_build(
         register_component
 ):
     config = Configuration()
-    config.add_short(name='child',
-                     value=RegistrationKey(name='component',
+    config.add(name='child',
+               value=RegistrationKey(name='component',
                                            namespace='testing'),
-                     build_type_hint=Component,
-                     is_registration=True)
+               build_type_hint=Component,
+               is_registration=True)
     config.post_build()
     config.validate(stage='post')
     assert type(config.child) == Component
@@ -151,11 +151,11 @@ def test_registration_post_build_mismatch(
         register_component
 ):
     config = Configuration()
-    config.add_short(name='child',
-                     value=RegistrationKey(name='component',
+    config.add(name='child',
+               value=RegistrationKey(name='component',
                                            namespace='testing'),
-                     build_type_hint=str,
-                     is_registration=True)
+               build_type_hint=str,
+               is_registration=True)
     config.post_build()
     with pytest.raises(ValidationFailureException):
         config.validate(stage='post')
@@ -168,12 +168,12 @@ class ConfigA(Configuration):
             cls
     ):
         copy = super().get_default()
-        copy.add_short(name='param1',
-                       value=False,
-                       type_hint=bool)
-        copy.add_short(name='param2',
-                       value=[1, 2, 3],
-                       type_hint=List[int])
+        copy.add(name='param1',
+                 value=False,
+                 type_hint=bool)
+        copy.add(name='param2',
+                 value=[1, 2, 3],
+                 type_hint=List[int])
         return copy
 
 
@@ -207,10 +207,10 @@ def test_deepcopy(get_deepcopy_config):
 
 def test_get_delta_copy():
     config = Configuration()
-    config.add_short(name='x',
-                     value=10,
-                     type_hint=int,
-                     description='a parameter')
+    config.add(name='x',
+               value=10,
+               type_hint=int,
+               description='a parameter')
     delta_copy: Configuration = config.get_delta_copy()
     config.x = 5
     assert delta_copy.x == 10
@@ -223,8 +223,8 @@ def test_get_delta_copy():
     assert config.x == 5
     assert type(other_copy) == Configuration
 
-    other_copy.add_short(name='y',
-                         value=0)
+    other_copy.add(name='y',
+                   value=0)
     assert 'y' not in config
     assert 'y' not in delta_copy
     assert other_copy.y == 0

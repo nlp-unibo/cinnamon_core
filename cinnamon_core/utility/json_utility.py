@@ -3,7 +3,24 @@ from typing import AnyStr, Any, Union
 
 import jsonpickle as json
 import jsonpickle.ext.numpy as jsonpickle_numpy
+
 jsonpickle_numpy.register_handlers()
+
+
+# TODO: documentation
+def to_json(
+        data: Any,
+        **kwargs
+):
+    return json.encode(data, **kwargs)
+
+
+# TODO: documentation
+def from_json(
+        data: str,
+        **kwargs
+):
+    return json.decode(data, **kwargs)
 
 
 def load_json(
@@ -23,7 +40,7 @@ def load_json(
 
     with filepath.open(mode='r') as f:
         data = f.read()
-        data = json.decode(data)
+        data = from_json(data=data)
 
     return data
 
@@ -44,7 +61,7 @@ def save_json(
     filepath = Path(filepath) if type(filepath) != Path else filepath
 
     with filepath.open(mode='w') as f:
-        data = json.encode(data, indent=4, **kwargs)
+        data = to_json(data, indent=4, **kwargs)
         f.write(data)
 
 
