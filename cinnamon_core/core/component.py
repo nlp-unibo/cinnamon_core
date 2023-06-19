@@ -23,7 +23,7 @@ class Component:
     def __init__(
             self,
             config: Configuration,
-            post_build: bool = True,
+            from_component: bool = False,
             serialization_id: Optional[int] = None
     ):
         """
@@ -31,19 +31,22 @@ class Component:
 
         Args:
             config: the ``Configuration`` instance bound to this ``Component``.
-            post_build: if True, ``Configuration.post_build()`` method is invoked along with corresponding conditions
+            from_component: if True, ``Configuration.post_build()`` method is invoked along with corresponding conditions
             evaluation.
             serialization_id: The unique identifier for serialization. It is used to distinguish components when nested.
         """
 
         self.config = config
-        self.config.validate(stage='pre')
+
+        if not from_component:
+            self.config.validate(stage='pre')
 
         self.serialization_id: int = serialization_id if serialization_id is not None else 0
 
-        if post_build:
+        if not from_component:
             self.config.post_build(serialization_id=self.serialization_id)
-            self.config.validate(stage='post')
+
+        self.config.validate(stage='post')
 
     def __getattr__(
             self,
@@ -140,8 +143,7 @@ class Component:
         """
 
         config_copy = self.config.get_delta_copy(params=params_dict)
-        return type(self)(config=config_copy,
-                          post_build=False)
+        return type(self)(config=config_copy, from_component=True)
 
     def run(
             self,

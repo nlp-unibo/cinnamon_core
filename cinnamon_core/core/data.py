@@ -301,7 +301,7 @@ class FieldDict(dict):
                      value={},
                      type_hint=Dict[str, Callable[[FieldDict], bool]],
                      description='Stores conditions (callable boolean evaluators) '
-                                       'that are used to assess the validity and correctness of this ParameterDict')
+                                 'that are used to assess the validity and correctness of this ParameterDict')
 
         if name is None:
             name = f'condition_{len(self.conditions) + 1}'
@@ -324,6 +324,12 @@ class FieldDict(dict):
         Raises:
             ``ValidationFailureException``: if ``strict = True`` and the validation process failed
         """
+
+        for key, value in self.items():
+            if isinstance(key, FieldDict):
+                key_validation = key.validate(strict=strict)
+                if not key_validation.passed:
+                    return key_validation
 
         if 'conditions' not in self:
             return ValidationResult(passed=True)

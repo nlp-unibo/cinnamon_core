@@ -694,6 +694,29 @@ class Registry:
 
         return True
 
+    # TODO: documentation
+    @staticmethod
+    def build_configuration_from_key(
+            registration_key: Registration
+    ):
+        if not Registry.is_in_registry(registration_key=registration_key):
+            raise NotRegisteredException(registration_key=registration_key)
+
+        config_info = Registry.retrieve_configurations_from_key(registration_key=registration_key)
+        return config_info.constructor(**config_info.kwargs)
+
+    # TODO: documentation
+    @staticmethod
+    def build_configuration(
+            name: str,
+            namespace: str = 'generic',
+            tags: Tag = None,
+    ):
+        registration_key = RegistrationKey(name=name,
+                                           tags=tags,
+                                           namespace=namespace)
+        return Registry.build_configuration_from_key(registration_key=registration_key)
+
     @staticmethod
     def register_configuration(
             config_class: Type[Configuration],
@@ -1267,7 +1290,7 @@ class Registry:
                     Registry.DEPENDENCY_DAG.add_edge(main_key, variant)
 
         # Register each combination of parameter variants
-        parameter_combinations = built_config.get_variants_combinations()
+        parameter_combinations = built_config.get_variants_combinations(validate=False)
 
         # Register each combination
         combination_keys = []

@@ -157,7 +157,7 @@ class Configuration(FieldDict):
 
     def get_variants_combinations(
             self,
-            registrations_only: bool = False
+            validate: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Gets all possible ``Configuration`` variant combinations of current ``Configuration``
@@ -167,7 +167,7 @@ class Configuration(FieldDict):
         - ``Configuration``-based: via ``@supports_variants`` and ``@add_variant`` decorators
 
         Args:
-            registrations_only: TODO
+            validate: TODO
 
         Returns:
             List of variant combinations.
@@ -177,10 +177,12 @@ class Configuration(FieldDict):
         parameters = {}
         for param_key, param in self.items():
             if param.variants is not None and len(param.variants):
-                if (registrations_only and param.is_registration) or not registrations_only:
-                    parameters[param_key] = param.variants
+                parameters[param_key] = param.variants
         combinations = get_dict_values_combinations(params_dict=parameters)
-        return [comb for comb in combinations if self.get_delta_copy(params=comb).validate(strict=False).passed]
+        if validate:
+            return [comb for comb in combinations if self.get_delta_copy(params=comb).validate(strict=False).passed]
+        else:
+            return combinations
 
     def get_serialization_parameters(
             self
@@ -253,6 +255,18 @@ class Configuration(FieldDict):
         Raises:
             ``InvalidConfigurationException``: if ``strict = True`` and the validation process failed
         """
+
+        if stage == 'pre':
+            for child_name, child in self.children.items():
+                child_key = child.value
+
+                if child_key is None:
+                    continue
+
+                child_config = core.registry.Registry.build_configuration_from_key(registration_key=child_key)
+                child_config_validation = child_config.validate(stage=stage, strict=strict)
+                if not child_config_validation.passed:
+                    return child_config_validation
 
         if stage not in ['pre', 'post']:
             raise AttributeError(f'Invalid stage passed! Got {stage} but allowed values are ["pre", "post"]')
