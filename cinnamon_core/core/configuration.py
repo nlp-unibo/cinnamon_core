@@ -368,9 +368,6 @@ class Configuration(FieldDict):
 
         copy_dict = deepcopy(params)
         copy = deepcopy(self)
-        # copy = self.get_default()
-        # for param_key, param in self.items():
-        #     copy.add(deepcopy(param))
 
         found_keys = []
         for key, value in params.items():
@@ -385,15 +382,13 @@ class Configuration(FieldDict):
         if not len(copy_dict):
             return copy
 
-        children = {param_key: param for param_key, param in copy.items()
-                    if param.is_registration and not param.is_calibration}
-        for child_key, child in children.items():
+        for child_key, child in copy.children.items():
             copy_dict = {key.replace(f'{child_key}.', '')
                          if key.startswith(child_key) else key: value
                          for key, value in copy_dict.items()}
 
             # No valid case if child is a RegistrationKey -> we avoid an unnecessary registration
-            if copy_dict and isinstance(child.value, core.component.Component):
+            if copy_dict and issubclass(child.value, core.component.Component):
                 copy.get(child_key).value.config = child.value.config.get_delta_copy(params=copy_dict)
 
         return copy
