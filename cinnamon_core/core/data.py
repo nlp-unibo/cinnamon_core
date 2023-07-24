@@ -381,7 +381,7 @@ class Parameter(Field):
             allowed_range: Optional[Callable[[Any], bool]] = None,
             affects_serialization: bool = False,
             is_required: bool = False,
-            is_registration: bool = False,
+            is_child: bool = False,
             is_calibration: bool = False,
             build_from_registration: bool = True,
             build_type_hint: Optional[Type] = None,
@@ -395,7 +395,7 @@ class Parameter(Field):
             allowed_range: allowed range of values for ``value``
             affects_serialization: if True, the Parameter leads to different serialization processes
             is_required: if True, ``value`` cannot be None
-            is_registration: if True, ``value`` must be a ``RegistrationKey`` instance
+            is_child: if True, ``value`` must be a ``RegistrationKey`` instance
             is_calibration: if True, ``value`` must be a ``RegistrationKey`` instance pointing to a calibration ``Configuration``
             build_from_registration: if True, the ``RegistrationKey`` ``value`` is replaced by its bounded ``Component``
             build_type_hint: the type hint annotation of the built ``Component``
@@ -406,7 +406,7 @@ class Parameter(Field):
         self.allowed_range = allowed_range
         self.affects_serialization = affects_serialization
         self.is_required = is_required
-        self.is_registration = is_registration
+        self.is_child = is_child
         self.is_calibration = is_calibration
         self.build_from_registration = build_from_registration
         self.build_type_hint = build_type_hint
@@ -431,7 +431,7 @@ class Parameter(Field):
         long_repr = super().long_repr()
         return long_repr + (f'affects_serialization: {self.affects_serialization} -- {os.linesep}'
                             f'is_required: {self.is_required} --{os.linesep}'
-                            f'is_registration: {self.is_registration} --{os.linesep}'
+                            f'is_child: {self.is_child} --{os.linesep}'
                             f'is_calibration: {self.is_calibration} --{os.linesep}'
                             f'build_from_registration: {self.build_from_registration} --{os.linesep}'
                             f'build_type_hint: {self.build_type_hint} --{os.linesep}'

@@ -9,7 +9,7 @@ from typing import Dict, Any, Callable, Optional, TypeVar, Hashable, Type, Itera
 from typeguard import check_type
 
 from cinnamon_core import core
-from cinnamon_core.core.data import FieldDict, Parameter, ValidationFailureException, F
+from cinnamon_core.core.data import FieldDict, Parameter, ValidationFailureException, ValidationResult, F
 from cinnamon_core.utility import logging_utility
 from cinnamon_core.utility.python_utility import get_dict_values_combinations
 
@@ -25,6 +25,17 @@ class Configuration(FieldDict):
 
     Differently from a ``FieldDict`` a ``Configuration`` is a extended dictionary that is specific to ``Component``.
     """
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.add(name='built',
+                 value=False,
+                 type_hint=bool,
+                 is_required=True,
+                 description="Internal status field that is True when post_build() is invoked, False otherwise.")
 
     def __setitem__(
             self,
@@ -45,7 +56,7 @@ class Configuration(FieldDict):
     ) -> Dict[str, F]:
         return {param_key: param
                 for param_key, param in self.items()
-                if param.is_registration and not param.is_calibration}
+                if param.is_child and not param.is_calibration}
 
     def add(
             self,
@@ -57,7 +68,7 @@ class Configuration(FieldDict):
             allowed_range: Optional[Callable[[Any], bool]] = None,
             affects_serialization: bool = False,
             is_required: bool = False,
-            is_registration: bool = False,
+            is_child: bool = False,
             is_calibration: bool = False,
             build_from_registration: bool = True,
             build_type_hint: Optional[Type] = None,
@@ -76,7 +87,7 @@ class Configuration(FieldDict):
             allowed_range: allowed range of values for ``value``
             affects_serialization: if True, the Parameter leads to different serialization processes
             is_required: if True, ``value`` cannot be None
-            is_registration: if True, ``value`` must be a ``RegistrationKey`` instance
+            is_child: if True, ``value`` must be a ``RegistrationKey`` instance
             is_calibration: if True, ``value`` must be a ``RegistrationKey`` instance pointing to a calibration ``Configuration``
             build_from_registration: if True, the ``RegistrationKey`` ``value`` is replaced by its bounded ``Component``
             build_type_hint: the type hint annotation of the built ``Component``
@@ -90,7 +101,7 @@ class Configuration(FieldDict):
                                allowed_range=allowed_range,
                                affects_serialization=affects_serialization,
                                is_required=is_required,
-                               is_registration=is_registration,
+                               is_child=is_child,
                                is_calibration=is_calibration,
                                build_from_registration=build_from_registration,
                                build_type_hint=build_type_hint,
@@ -120,14 +131,14 @@ class Configuration(FieldDict):
 
         # add type_hint condition
         if type_hint is not None and not is_calibration:
-            self.add_condition(name=f'{name}_typecheck',
+            self.add_condition(name=f'{name}_typecheck' if not is_child else f'pre_{name}_typecheck',
                                condition=lambda parameters: partial(typing_condition,
                                                                     param_name=name,
                                                                     type_hint=type_hint)(parameters))
 
         # add post-build condition if the parameter is registration and should be built
-        if is_registration and build_from_registration and build_type_hint is not None:
-            self.add_condition(name=f'{name}_build_typecheck',
+        if is_child and build_from_registration and build_type_hint is not None:
+            self.add_condition(name=f'post_{name}_build_typecheck',
                                condition=lambda parameters: partial(typing_condition,
                                                                     param_name=name,
                                                                     type_hint=build_type_hint)(parameters))
@@ -164,7 +175,9 @@ class Configuration(FieldDict):
                 parameters[param_key] = param.variants
         combinations = get_dict_values_combinations(params_dict=parameters)
         if validate:
-            return [comb for comb in combinations if self.get_delta_copy(params=comb).validate(strict=False).passed]
+            # TODO: we should have fully_validate() here. However, this denies having FileManager in component __init__
+            return [comb for comb in combinations
+                    if self.get_delta_copy(params=comb).validate(strict=False).passed]
         else:
             return combinations
 
@@ -180,6 +193,75 @@ class Configuration(FieldDict):
         """
         return {key: param for key, param in self.items() if param.affects_serialization}
 
+    def validate(
+            self,
+            strict: bool = True
+    ) -> ValidationResult:
+        """
+        Calls all stage-related conditions to assess the correctness of the current ``Configuration``.
+
+        Args:
+            strict: if True, a failed validation process will raise ``InvalidConfigurationException``
+
+        Returns:
+            A ``ValidationResult`` object that stores the boolean result of the validation process along with
+            an error message if the result is ``False``.
+
+        Raises:
+            ``ValidationFailureException``: if ``strict = True`` and the validation process failed
+        """
+
+        for key, value in self.items():
+            if isinstance(key, FieldDict):
+                key_validation = key.validate(strict=strict)
+                if not key_validation.passed:
+                    return key_validation
+
+        if 'conditions' not in self:
+            return ValidationResult(passed=True)
+
+        for condition_name, condition in self.conditions.items():
+            if condition_name.startswith('pre') and self.built:
+                continue
+            if condition_name.startswith('post') and not self.built:
+                continue
+
+            if not condition(self):
+                validation_result = ValidationResult(passed=False,
+                                                     error_message=f'Condition {condition_name} failed!')
+                if strict:
+                    raise ValidationFailureException(validation_result=validation_result)
+
+                return validation_result
+
+        return ValidationResult(passed=True)
+
+    def fully_validate(
+            self,
+            strict: bool = True
+    ):
+        """
+        Validates a ``Configuration`` in all stages.
+        If the ``Configuration`` has yet to run post_build(), the method is then invoked.
+        Note that this method alters the internal status of the ``Configuration``.
+        It is recommended to be executed on a copy.
+
+        Args:
+            strict: if True, a failed validation process will raise ``InvalidConfigurationException``
+
+        Returns:
+            A ``ValidationResult`` object that stores the boolean result of the validation process along with
+            an error message if the result is ``False``.
+
+        Raises:
+            ``ValidationFailureException``: if ``strict = True`` and the validation process failed
+        """
+
+        if not self.built:
+            self.validate(strict=strict)
+            self.post_build()
+        return self.validate(strict=strict)
+
     def post_build(
             self
     ):
@@ -188,9 +270,13 @@ class Configuration(FieldDict):
         bounded ``Component`` instance.
 
         """
+        if not self.built:
+            self.built = True
+        else:
+            return
 
         for param_key, param in self.items():
-            if param.is_registration and param.build_from_registration and param.value is not None:
+            if param.is_child and param.build_from_registration and param.value is not None:
                 if 'conditions' in self and f'{param_key}_typecheck' in self.conditions:
                     del self.conditions[f'{param_key}_typecheck']
 
