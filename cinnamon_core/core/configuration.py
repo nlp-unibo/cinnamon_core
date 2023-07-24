@@ -175,9 +175,8 @@ class Configuration(FieldDict):
                 parameters[param_key] = param.variants
         combinations = get_dict_values_combinations(params_dict=parameters)
         if validate:
-            # TODO: we should have fully_validate() here. However, this denies having FileManager in component __init__
             return [comb for comb in combinations
-                    if self.get_delta_copy(params=comb).validate(strict=False).passed]
+                    if self.get_delta_copy(params=comb).fully_validate(strict=False).passed]
         else:
             return combinations
 
