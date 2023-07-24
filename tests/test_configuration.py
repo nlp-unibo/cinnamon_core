@@ -20,6 +20,10 @@ def define_configuration():
 
 
 def test_define_configuration(define_configuration):
+    """
+    Testing configuration definition and get/set attribute APIs
+    """
+
     config = define_configuration
     assert config.x == 10
     assert config.get('x').value == 10
@@ -31,12 +35,20 @@ def test_define_configuration(define_configuration):
 
 
 def test_validate_empty(define_configuration):
+    """
+    Testing that an empty configuration (i.e., no parameters and no conditions) is always valid
+    """
+
     config = define_configuration
     result = config.validate()
     assert result.passed is True
 
 
 def test_type_hint_validation_nonstrict(define_configuration):
+    """
+    Testing that typecheck condition triggers when setting a parameter to a new value with different type
+    """
+
     config = define_configuration
     result = config.validate(strict=False)
     assert result.passed is True
@@ -45,19 +57,14 @@ def test_type_hint_validation_nonstrict(define_configuration):
 
     result = config.validate(strict=False)
     assert result.passed is False
-    assert result.error_message == '[Stage = pre] Condition x_typecheck failed!'
-
-
-def test_no_failure_with_post_validation(define_configuration):
-    config = define_configuration
-    result = config.validate(strict=False)
-    assert result.passed is True
-
-    config.x = '10'
-    config.validate(stage='post')
+    assert result.error_message == 'Condition x_typecheck failed!'
 
 
 def test_type_hint_validation_strict(define_configuration):
+    """
+    Testing that configuration.validate() raises an exception when running in strict mode (default)
+    """
+
     config = define_configuration
     config.validate()
 
@@ -67,6 +74,10 @@ def test_type_hint_validation_strict(define_configuration):
 
 
 def test_required_validation():
+    """
+    Testing that 'is_required' parameter attribute triggers an exception when parameter.value is None
+    """
+
     config = Configuration()
     config.add(name='x',
                is_required=True,
@@ -77,6 +88,10 @@ def test_required_validation():
 
 
 def test_allowed_range_validation():
+    """
+    Testing that configuration triggers an exception when parameter.value is not in parameter.allowed_range
+    """
+
     config = Configuration()
     config.add(name='x',
                value=5,
@@ -90,18 +105,11 @@ def test_allowed_range_validation():
         config.x = 10
 
 
-def test_variants_validation():
-    config = Configuration()
-    config.add(name='x',
-               value=5,
-               is_required=True,
-               type_hint=int,
-               variants=[1, 2, 3, 4, 5],
-               description='a parameter')
-    config.validate()
-
-
 def test_variants_validation_exception():
+    """
+    Testing that an empty parameter.variants field is not allowed
+    """
+
     config = Configuration()
     config.add(name='x',
                value=5,
@@ -125,10 +133,14 @@ def register_component():
 def test_registration(
         register_component
 ):
+    """
+    Testing configuration.validate() of a nested configuration
+    """
+
     config = Configuration()
     config.add(name='child',
                value=RegistrationKey(name='component',
-                                           namespace='testing'),
+                                     namespace='testing'),
                is_registration=True)
     config.validate()
 
@@ -136,29 +148,37 @@ def test_registration(
 def test_registration_post_build(
         register_component
 ):
+    """
+    Testing that config.post_build() builds all configuration children (from registration key to component)
+    """
+
     config = Configuration()
     config.add(name='child',
                value=RegistrationKey(name='component',
-                                           namespace='testing'),
+                                     namespace='testing'),
                build_type_hint=Component,
                is_registration=True)
     config.post_build()
-    config.validate(stage='post')
+    config.validate(strict=False)
     assert type(config.child) == Component
 
 
 def test_registration_post_build_mismatch(
         register_component
 ):
+    """
+    Testing that configuration raises an exception when a wrong 'build_type_hint' is specified
+    """
+
     config = Configuration()
     config.add(name='child',
                value=RegistrationKey(name='component',
-                                           namespace='testing'),
+                                     namespace='testing'),
                build_type_hint=str,
                is_registration=True)
     config.post_build()
     with pytest.raises(ValidationFailureException):
-        config.validate(stage='post')
+        config.validate()
 
 
 class ConfigA(Configuration):
@@ -192,20 +212,21 @@ def get_deepcopy_config():
 
 
 def test_copy(get_default_config):
+    """
+    Testing that a configuration can be deepcopied
+    """
+
     config, copy = get_default_config
     copy.param2.append(5)
     assert config.param2 == [1, 2, 3]
     assert copy.param2 == [1, 2, 3, 5]
 
 
-def test_deepcopy(get_deepcopy_config):
-    config, copy = get_deepcopy_config
-    copy.param2.append(5)
-    assert config.param2 == [1, 2, 3]
-    assert copy.param2 == [1, 2, 3, 5]
-
-
 def test_get_delta_copy():
+    """
+    Testing configuration.get_delta_copy()
+    """
+
     config = Configuration()
     config.add(name='x',
                value=10,

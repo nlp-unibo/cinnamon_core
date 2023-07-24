@@ -53,6 +53,10 @@ def test_repeated_registration(
 def test_invalid_configuration_retrieval(
         reset_registry
 ):
+    """
+    Testing that an exception occurs when trying to retrieve an unregistered configuration
+    """
+
     registration_key = RegistrationKey(name='test_config',
                                        tags={'tag1', 'tag2'},
                                        namespace='testing')
@@ -69,6 +73,12 @@ def test_invalid_configuration_retrieval(
 def test_retrieve_multiple_configurations(
         reset_registry
 ):
+    """
+    Testing registry partial match search for configurations.
+    Partial match search looks for all registration keys that are equal or subsets of the specified search key.
+    In this example, key1 is retrieved as well since its tags are a subset of key2 tags (all other fields are equal)
+    """
+
     key1 = RegistrationKey(name='test_config',
                            tags={'tag1'},
                            namespace='testing')
@@ -89,6 +99,10 @@ def test_retrieve_multiple_configurations(
 def test_register_and_then_binding(
         reset_registry
 ):
+    """
+    Test configuration registration and bind APIs
+    """
+
     key = Registry.register_configuration(config_class=Configuration,
                                           name='test',
                                           tags={'tag1'},
@@ -100,6 +114,10 @@ def test_register_and_then_binding(
 def test_register_and_then_binding_exception(
         reset_registry
 ):
+    """
+    Testing that an exception occurs when trying to re-bind a configuration
+    """
+
     key = Registry.register_configuration(config_class=Configuration,
                                           name='test',
                                           tags={'tag1'},
@@ -114,6 +132,10 @@ def test_register_and_then_binding_exception(
 def test_register_and_binding(
         reset_registry
 ):
+    """
+    Testing registry.register_and_bind() function
+    """
+
     Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='test',
@@ -124,6 +146,11 @@ def test_register_and_binding(
 def test_register_and_binding_exception(
         reset_registry
 ):
+    """
+    Testing that an exception occurs when re-running registry.register_and_bind() for an already registered (and bound)
+    configuration
+    """
+
     Registry.register_and_bind(config_class=Configuration,
                                component_class=Component,
                                name='test',
@@ -140,6 +167,10 @@ def test_register_and_binding_exception(
 def test_build_component(
         reset_registry
 ):
+    """
+    Testing Component building from a registered (and bound) configuration
+    """
+
     key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
@@ -151,6 +182,10 @@ def test_build_component(
 def test_register_built_component(
         reset_registry
 ):
+    """
+    Testing built component live registration API
+    """
+
     key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
@@ -163,6 +198,10 @@ def test_register_built_component(
 def test_retrieve_built_component(
         reset_registry
 ):
+    """
+    Testing built component live registration and retrieval APIs
+    """
+
     key = Registry.register_and_bind(config_class=Configuration,
                                      component_class=Component,
                                      name='component',
@@ -177,6 +216,10 @@ def test_retrieve_built_component(
 def test_register_built_component_exception(
         reset_registry
 ):
+    """
+    Testing that an exception occurs when trying to retrieve an unregistered built component
+    """
+
     component = Component(config=Configuration())
     key = RegistrationKey(name='component',
                           namespace='testing')
@@ -188,6 +231,10 @@ def test_register_built_component_exception(
 def test_retrieve_external_configurations(
         reset_registry
 ):
+    """
+    Testing Component building API for an external registration.
+    """
+
     external_path = Path().absolute().parent.joinpath('tests', 'external_test_repo')
     Registry.load_registrations(directory_path=external_path)
     Registry.expand_and_resolve_registration()
@@ -216,6 +263,10 @@ class ConfigA(Configuration):
 def test_register_delta_copy(
         reset_registry
 ):
+    """
+    Testing registering a configuration delta copy (and building it)
+    """
+
     Registry.register_and_bind(config_class=ConfigA,
                                component_class=Component,
                                config_constructor=ConfigA.get_delta_class_copy,

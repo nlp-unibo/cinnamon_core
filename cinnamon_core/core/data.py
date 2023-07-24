@@ -221,39 +221,6 @@ class FieldDict(dict):
 
         return {key: convert_field(field) for key, field in self.items() if key != 'conditions'}
 
-    def _add(
-            self,
-            field: Field
-    ):
-        """
-        Adds a ``Field`` to the ``FieldDict``.
-
-        Args:
-            field: the ``Field`` instance to add
-        """
-        self[field.name] = field
-
-        def typing_condition(
-                fields: FieldDict,
-                field_name: Hashable,
-                type_hint: Type
-        ) -> bool:
-            try:
-                found_param = fields.get(field_name)
-                check_type(argname=str(found_param.name),
-                           value=found_param.value,
-                           expected_type=type_hint)
-            except TypeError:
-                return False
-            return True
-
-        # add type_hint condition
-        if field.type_hint is not None:
-            self.add_condition(name=f'{field.name}_typecheck',
-                               condition=lambda fields: partial(typing_condition,
-                                                                field_name=field.name,
-                                                                type_hint=field.type_hint)(fields))
-
     def add(
             self,
             name: Hashable,
@@ -273,12 +240,32 @@ class FieldDict(dict):
             tags: a set of string tags to mark the ``Field`` instance with metadata.
         """
 
-        field = Field(name=name,
-                      value=value,
-                      type_hint=type_hint,
-                      description=description,
-                      tags=tags)
-        self._add(field=field)
+        self[name] = Field(name=name,
+                           value=value,
+                           type_hint=type_hint,
+                           description=description,
+                           tags=tags)
+
+        def typing_condition(
+                fields: FieldDict,
+                field_name: Hashable,
+                type_hint: Type
+        ) -> bool:
+            try:
+                found_param = fields.get(field_name)
+                check_type(argname=str(found_param.name),
+                           value=found_param.value,
+                           expected_type=type_hint)
+            except TypeError:
+                return False
+            return True
+
+        # add type_hint condition
+        if type_hint is not None:
+            self.add_condition(name=f'{name}_typecheck',
+                               condition=lambda fields: partial(typing_condition,
+                                                                field_name=name,
+                                                                type_hint=type_hint)(fields))
 
     def add_condition(
             self,

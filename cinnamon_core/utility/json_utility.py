@@ -7,7 +7,6 @@ import jsonpickle.ext.numpy as jsonpickle_numpy
 jsonpickle_numpy.register_handlers()
 
 
-# TODO: documentation
 def to_json(
         data: Any,
         **kwargs
@@ -15,7 +14,6 @@ def to_json(
     return json.encode(data, **kwargs)
 
 
-# TODO: documentation
 def from_json(
         data: str,
         **kwargs
@@ -65,4 +63,4 @@ def save_json(
         f.write(data)
 
 
-__all__ = ['load_json', 'save_json']
+__all__ = ['from_json', 'to_json', 'load_json', 'save_json']

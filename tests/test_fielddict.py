@@ -7,6 +7,10 @@ from cinnamon_core.core.data import FieldDict, Field, ValidationFailureException
 
 
 def test_adding_field():
+    """
+    Testing fielddict.add() function
+    """
+
     field_dict = FieldDict()
     field_dict.add(name='x',
                    value=50,
@@ -19,6 +23,10 @@ def test_adding_field():
 
 
 def test_init_from_dict():
+    """
+    Testing that a fielddict can be initialized from a python dictionary
+    """
+
     field_dict = FieldDict({'x': 50})
     assert field_dict.x == 50
     assert field_dict.get('x').value == 50
@@ -27,6 +35,10 @@ def test_init_from_dict():
 
 
 def test_typecheck():
+    """
+    Testing that typecheck condition fails when setting a field to a new value with different type
+    """
+
     field_dict = FieldDict()
     field_dict.add(name='x',
                    value=50,
@@ -38,6 +50,10 @@ def test_typecheck():
 
 
 def test_add_condition():
+    """
+    Testing fielddict.add_condition() function
+    """
+
     field_dict = FieldDict()
     field_dict.add(name='x',
                    value=[1, 2, 3],
@@ -56,7 +72,11 @@ def test_add_condition():
         field_dict.validate()
 
 
-def test_deepcopy():
+def test_copy():
+    """
+    Testing that a fielddict can be deepcopied
+    """
+
     field_dict = FieldDict()
     field_dict.add(name='x',
                    value=[1, 2, 3])

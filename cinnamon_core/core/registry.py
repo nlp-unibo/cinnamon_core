@@ -12,7 +12,7 @@ from pyvis.network import Network
 from typeguard import check_type
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration
+from cinnamon_core.core.configuration import Configuration, C
 from cinnamon_core.utility import logging_utility
 
 Tag = Optional[Set[str]]
@@ -159,7 +159,6 @@ class RegistrationKey:
 
         return RegistrationKey(**registration_dict)
 
-    # TODO: overload with singledispatch?
     @classmethod
     def parse(
             cls,
@@ -357,7 +356,6 @@ class Registry:
     def import_and_load_registrations(
             spec
     ):
-        # TODO: a bit of a hack -> should we mark registered methods to avoid re-executions?
         previous_methods_size = len(Registry.REGISTRATION_METHODS)
         module = importlib.util.module_from_spec(spec=spec)
         spec.loader.exec_module(module)
@@ -694,24 +692,44 @@ class Registry:
 
         return True
 
-    # TODO: documentation
     @staticmethod
     def build_configuration_from_key(
             registration_key: Registration
-    ):
+    ) -> C:
+        """
+        Builds a configuration instance given its registration key.
+
+        Args:
+            registration_key: key used to register the configuration
+
+        Returns:
+            The built configuration
+        """
+
         if not Registry.is_in_registry(registration_key=registration_key):
             raise NotRegisteredException(registration_key=registration_key)
 
         config_info = Registry.retrieve_configurations_from_key(registration_key=registration_key)
         return config_info.constructor(**config_info.kwargs)
 
-    # TODO: documentation
     @staticmethod
     def build_configuration(
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
     ):
+        """
+                Builds a configuration instance given its implicit registration key.
+
+        Args:
+            name: the ``name`` field of ``RegistrationKey``
+            namespace: the ``namespace`` field of ``RegistrationKey``
+            tags: the ``tags`` field of ``RegistrationKey``
+
+        Returns:
+            The built configuration
+        """
+
         registration_key = RegistrationKey(name=name,
                                            tags=tags,
                                            namespace=namespace)
@@ -736,7 +754,7 @@ class Registry:
             name: the ``name`` field of ``RegistrationKey``
             namespace: the ``namespace`` field of ``RegistrationKey``
             tags: the ``tags`` field of ``RegistrationKey``
-            is_default: TODO
+            is_default: if True, the 'default' tag is automatically added to configuration tags
             config_constructor: the constructor method to build the ``Configuration`` instance from its class
             config_kwargs: potential arguments to the ``configuration_constructor`` method.
 
@@ -1096,8 +1114,8 @@ class Registry:
             name: the ``name`` field of ``RegistrationKey``
             tags: the ``tags`` field of ``RegistrationKey``
             namespace: the ``namespace`` field of ``RegistrationKey``
-            config_constructor: TODO
-            config_kwargs: TODO
+            config_constructor: callable that builds the configuration instance (just like ``get_default()``)
+            config_kwargs: optional constructor arguments
 
         Returns:
             the list of ``RegistrationKey`` used to register each ``Configuration`` variant
@@ -1247,8 +1265,8 @@ class Registry:
             name: the ``name`` field of ``RegistrationKey``
             tags: the ``tags`` field of ``RegistrationKey``
             namespace: the ``namespace`` field of ``RegistrationKey``
-            config_constructor: TODO
-            config_kwargs: TODO
+            config_constructor: callable that builds the configuration instance (just like ``get_default()``)
+            config_kwargs: optional constructor arguments
 
         Returns:
             the list of ``RegistrationKey`` used to register each ``Configuration`` variant

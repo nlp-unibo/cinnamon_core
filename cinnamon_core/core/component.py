@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import abc
 from pathlib import Path
 from typing import AnyStr, Any, Iterable, Optional, Dict, Union, TypeVar, Type, cast
 
@@ -8,7 +7,6 @@ from typeguard import check_type
 
 from cinnamon_core import core
 from cinnamon_core.core.configuration import Configuration
-from cinnamon_core.core.data import FieldDict
 from cinnamon_core.utility.pickle_utility import save_pickle, load_pickle
 
 C = TypeVar('C', bound='Component')
@@ -23,30 +21,23 @@ class Component:
     def __init__(
             self,
             config: Configuration,
-            from_component: bool = False,
-            serialization_id: Optional[int] = None
+            from_component: bool = False
     ):
         """
         ``Component`` constructor.
 
         Args:
             config: the ``Configuration`` instance bound to this ``Component``.
-            from_component: if True, ``Configuration.post_build()`` method is invoked along with corresponding conditions
-            evaluation.
-            serialization_id: The unique identifier for serialization. It is used to distinguish components when nested.
+            from_component: if True, ``Configuration.post_build()`` method is invoked along with corresponding
+            conditions evaluation.
         """
 
         self.config = config
 
         if not from_component:
-            self.config.validate(stage='pre')
+            self.config.post_build()
 
-        self.serialization_id: int = serialization_id if serialization_id is not None else 0
-
-        if not from_component:
-            self.config.post_build(serialization_id=self.serialization_id)
-
-        self.config.validate(stage='post')
+        self.config.validate()
 
     def __getattr__(
             self,
@@ -61,15 +52,26 @@ class Component:
         else:
             raise AttributeError(f'{self.__class__.__name__} has no attribute {item}')
 
+    def __setattr__(
+            self,
+            key,
+            value
+    ):
+        if hasattr(self, 'config') and key in self.config:
+            self.config[key] = value
+        else:
+            super().__setattr__(key, value)
+
     def __dir__(
             self
     ) -> Iterable[str]:
         return list(super().__dir__()) + list(self.config.__dir__())
 
+    # The father component calls its child save with its associated name
     def save(
             self,
             serialization_path: Optional[Union[AnyStr, Path]] = None,
-            overwrite: bool = False
+            name: Optional[str] = None
     ):
         """
         Saves ``Component`` internal state in Pickle format.
@@ -77,54 +79,68 @@ class Component:
 
         Args:
             serialization_path: Path where to save the ``Component`` state.
-            overwrite: if True, the existing serialized ``Component`` state is overwritten.
+            name: if the component is a child in another component configuration, ``name`` is the parameter key
+            used by the parent to reference the child. Otherwise, ``name`` is automatically set to the component class
+            name.
         """
 
+        if serialization_path is None:
+            return
+
+        serialization_path = Path(serialization_path) if type(serialization_path) != Path else serialization_path
+        name = name if name is not None else self.__class__.__name__
+
         # Call save() for children as well
-        for param_key, param in self.config.items():
-            if isinstance(param.value, Component):
-                param.value.save(serialization_path=serialization_path,
-                                 overwrite=overwrite)
+        for param_key, param in self.config.children.items():
+            param.value.save(serialization_path=serialization_path,
+                             name=f'{name}_{param_key}')
 
         if serialization_path is not None:
-            component_path = serialization_path.joinpath(f'{self.__class__.__name__}_{self.serialization_id}')
-            if component_path.exists() and not overwrite:
-                raise RuntimeError(f'Cannot overwrite existing serialized state if overwrite={overwrite}')
-
+            component_path = serialization_path.joinpath(name)
+            data = self.prepare_save_data()
             save_pickle(filepath=component_path,
-                        data=self.state)
+                        data=data)
 
+    def prepare_save_data(
+            self
+    ) -> Dict:
+        return {key: value for key, value in self.config.items() if not isinstance(value, Component)}
+
+    # The father component calls its child save with its associated name
     def load(
             self,
-            serialization_path: Optional[Union[AnyStr, Path]] = None
+            serialization_path: Optional[Union[AnyStr, Path]] = None,
+            name: Optional[str] = None
     ):
         """
         Loads ``Component``'s internal state from serialized Pickle file.
 
         Args:
             serialization_path: Path where to load the ``Component``'s state.
+            name: if the component is a child in another component configuration, ``name`` is the parameter key
+            used by the parent to reference the child. Otherwise, ``name`` is automatically set to the component class
+            name.
         """
 
+        if serialization_path is None:
+            return
+
+        serialization_path = Path(serialization_path) if type(serialization_path) != Path else serialization_path
+        name = name if name is not None else self.__class__.__name__
+
         # Call load() for children as well
-        for param_key, param in self.config.items():
-            if isinstance(param.value, Component):
-                param.value.load(serialization_path=serialization_path)
+        for param_key, param in self.config.children.items():
+            param.value.load(serialization_path=serialization_path,
+                             name=f'{name}_{param_key}')
 
         if serialization_path is not None:
-            component_path = serialization_path.joinpath(f'{self.__class__.__name__}_{self.serialization_id}')
-            loaded_state = load_pickle(filepath=component_path)
+            component_path = serialization_path.joinpath(name)
+            loaded_state: Dict = load_pickle(filepath=component_path)
             for key, value in loaded_state.items():
-                if key == 'config':
-                    for param_key, param in value.items():
-                        self.config._add(param)
+                if key in self.config:
+                    self.config[key] = value
                 elif hasattr(self, key):
                     setattr(self, key, value)
-
-    @property
-    def state(
-            self
-    ) -> FieldDict:
-        return FieldDict()
 
     def get_delta_copy(
             self: Type[C],

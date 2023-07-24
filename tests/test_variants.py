@@ -60,6 +60,11 @@ def reset_registry():
 def test_flatten_parameter_variants(
         reset_registry
 ):
+    """
+    Testing registering and binding nested configuration and its variants.
+    In this case, the variants are just at the parent configuration level.
+    """
+
     Registry.register_and_bind(config_class=NestedChild,
                                component_class=Component,
                                name='config_a',
@@ -129,6 +134,10 @@ class ConfigC(Configuration):
 def test_nested_parameter_variants(
         reset_registry
 ):
+    """
+    Testing registering and binding nested configuration and its variants.
+    """
+
     Registry.register_and_bind(config_class=ConfigB,
                                config_constructor=ConfigB.get_default,
                                component_class=Component,
@@ -201,6 +210,10 @@ class ConfigF(Configuration):
 def test_variants_with_conditions(
         reset_registry
 ):
+    """
+    Testing registering configuration and its valid variants
+    """
+
     variant_keys = Registry.register_and_bind_variants(config_class=ConfigF,
                                                        component_class=Component,
                                                        name='config_f',

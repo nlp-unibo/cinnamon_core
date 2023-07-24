@@ -16,6 +16,10 @@ def reset_registry():
 def test_add_configuration(
         reset_registry
 ):
+    """
+    Testing that the registration DAG has new nodes and edges when adding a configuration to the registry
+    """
+
     Registry.add_configuration(config_class=Configuration,
                                name='config',
                                namespace='testing')
@@ -28,6 +32,10 @@ def test_add_configuration(
 def test_expand_and_resolve_single_configuration(
         reset_registry
 ):
+    """
+    Testing registry.expand_and_resolve_registration() function
+    """
+
     Registry.add_configuration(config_class=Configuration,
                                name='config',
                                namespace='testing')
@@ -39,6 +47,10 @@ def test_expand_and_resolve_single_configuration(
 def test_add_and_bind_configuration(
         reset_registry
 ):
+    """
+    Testing that the registration DAG gets new nodes and edges when using registry.add_and_bind()
+    """
+
     Registry.add_and_bind(config_class=Configuration,
                           component_class=Component,
                           name='config',
@@ -70,6 +82,11 @@ class ConfigA(Configuration):
 def test_flat_add_variants(
         reset_registry
 ):
+    """
+    Testing that the registration DAG has new nodes and edges when adding a configuration
+    and its variants to the registry
+    """
+
     Registry.add_and_bind_variants(config_class=ConfigA,
                                    component_class=Component,
                                    name='config',
@@ -96,6 +113,10 @@ class ConfigB(ConfigA):
 def test_one_level_add_variants(
         reset_registry
 ):
+    """
+    Testing adding a flat configuration and its variants to the registration DAG
+    """
+
     Registry.add_and_bind_variants(config_class=ConfigB,
                                    component_class=Component,
                                    name='config',
@@ -163,6 +184,10 @@ class ConfigE(Configuration):
 def test_two_level_add_variants(
         reset_registry
 ):
+    """
+    Testing adding a nested configuration and its variants to the registration DAG
+    """
+
     Registry.add_and_bind_variants(config_class=ConfigC,
                                    component_class=Component,
                                    name='config_c',
@@ -217,6 +242,10 @@ class ConfigG(Configuration):
 def test_cycle(
         reset_registry
 ):
+    """
+    Testing that an exception occurs when the registration DAG contains a cycle (i.e., it is not a DAG)
+    """
+
     Registry.add_configuration(config_class=ConfigF,
                                name='config_f',
                                namespace='testing')
@@ -245,6 +274,11 @@ class ConfigH(Configuration):
 def test_external_dependency(
         reset_registry
 ):
+    """
+    Testing that an external registration can be added to the registration DAG without errors.
+    In particular, expanding the external registration triggers module import of the external package
+    """
+
     external_path = Path().absolute().parent.joinpath('tests', 'external_test_repo')
     Registry.load_registrations(directory_path=external_path)
 
@@ -289,6 +323,10 @@ class ConfigJ(Configuration):
 def test_nested_configuration_variant(
         reset_registry
 ):
+    """
+    Testing adding a nested configuration and its variants to the registration DAG
+    """
+
     Registry.add_and_bind_variants(config_class=ConfigI,
                                    component_class=Component,
                                    name='config_i',
