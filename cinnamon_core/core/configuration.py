@@ -191,6 +191,9 @@ class Configuration(FieldDict):
 
         for param_key, param in self.items():
             if param.is_registration and param.build_from_registration and param.value is not None:
+                if 'conditions' in self and f'{param_key}_typecheck' in self.conditions:
+                    del self.conditions[f'{param_key}_typecheck']
+
                 if type(param.value) == core.registry.RegistrationKey:
                     param.value = core.registry.Registry.build_component_from_key(registration_key=param.value)
                 else:

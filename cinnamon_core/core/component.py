@@ -92,8 +92,9 @@ class Component:
 
         # Call save() for children as well
         for param_key, param in self.config.children.items():
-            param.value.save(serialization_path=serialization_path,
-                             name=f'{name}_{param_key}')
+            if isinstance(param.value, Component):
+                param.value.save(serialization_path=serialization_path,
+                                 name=f'{name}_{param_key}')
 
         if serialization_path is not None:
             component_path = serialization_path.joinpath(name)
@@ -130,8 +131,9 @@ class Component:
 
         # Call load() for children as well
         for param_key, param in self.config.children.items():
-            param.value.load(serialization_path=serialization_path,
-                             name=f'{name}_{param_key}')
+            if isinstance(param.value, Component):
+                param.value.load(serialization_path=serialization_path,
+                                 name=f'{name}_{param_key}')
 
         if serialization_path is not None:
             component_path = serialization_path.joinpath(name)
