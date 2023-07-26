@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Welcome to cinnamon-core’s documentation! &#8212; cinnamon-core 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Motivational Intro" href="intro.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-cinnamon-core-s-documentation">
+<h1>Welcome to cinnamon-core’s documentation!<a class="headerlink" href="#welcome-to-cinnamon-core-s-documentation" title="Permalink to this heading">¶</a></h1>
+<p>Cinnamon is a simple framework for general-purpose configuration and code logic de-coupling.
+It was developed to offer two main functionalities:</p>
+<ol class="arabic simple">
+<li><p>De-coupling a code logic from its regulating parameters</p></li>
+<li><p>Quick re-use of code logic</p></li>
+</ol>
+</section>
+<section id="features">
+<h1>Features<a class="headerlink" href="#features" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>General-purpose: <code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is meant to simplify your code organization and re-use.</p></li>
+<li><p>Simple: <code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is a small library that acts as a high-level wrapper for your projects.</p></li>
+<li><p>Modular: <code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is shipped in several small packages to meet different requirements</p></li>
+<li><p>Community-based: the <code class="docutils literal notranslate"><span class="pre">Component</span></code> and <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> you define can be imported/exported from/to other users!</p></li>
+<li><p>Flexible: <code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> imposes minimal APIs meant to simplify code organization. You are still free to code as you like!</p></li>
+</ul>
+</section>
+<section id="logic-and-configuration-de-coupling">
+<h1>Logic and Configuration de-coupling<a class="headerlink" href="#logic-and-configuration-de-coupling" title="Permalink to this heading">¶</a></h1>
+<p>Consider a classic machine-learning.
+Your first task is to load some data.
+A skeleton of your data loader may be as follows:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
+class DataLoader:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def load(…):</dt><dd><p>pass</p>
+</dd>
+<dt>def parse(data):</dt><dd><p>pass</p>
+</dd>
+<dt>def build_splits(data):</dt><dd><p>pass</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
+<p>Your data loader can <code class="docutils literal notranslate"><span class="pre">load</span></code> some data (e.g., from filesystem),
+<code class="docutils literal notranslate"><span class="pre">parse</span></code> it to a convenient format and (optionally) defining train/val/test <code class="docutils literal notranslate"><span class="pre">splits</span></code>.</p>
+<p>Each of the above functionalities may be regulated by some parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">load</span></code>: we may specify whether to load from JSON, from an online repository or from something else.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parse</span></code>: we may specify if some input fields have to be considered or if some parsing functions have to be carried out.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">build_splits</span></code>: we may specify whether to build some splits if they don’t exist or the maximum amount of samples to pick (e.g., for testing)</p></li>
+</ul>
+<p>Well, these parameters define a <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> in <code class="docutils literal notranslate"><span class="pre">cinnamon</span></code>,
+while the above <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> logic is a <code class="docutils literal notranslate"><span class="pre">Component</span></code> that uses a suitable <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> for its execution.</p>
+</section>
+<section id="quick-re-use">
+<h1>Quick re-use<a class="headerlink" href="#quick-re-use" title="Permalink to this heading">¶</a></h1>
+<p>In many cases, we use and re-use a code logic (or some variants of it) for different purposes.
+Recall the data loader example of previous section:
+we may use it for evaluating different machine-learning models (in different projects)
+or testing distinct data pre-processing steps.</p>
+<p>For this reason, it may be convenient to quickly access to the data loader logic we want to re-use.
+In <code class="docutils literal notranslate"><span class="pre">cinnamon</span></code>, a <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> is used to define an instance of a <code class="docutils literal notranslate"><span class="pre">Component</span></code>.
+Each <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> can be registered in a <code class="docutils literal notranslate"><span class="pre">Registry</span></code> via a <code class="docutils literal notranslate"><span class="pre">key</span></code> for quick re-use:</p>
+<ol class="arabic simple">
+<li><p>Define your code logic: <code class="docutils literal notranslate"><span class="pre">Component</span></code></p></li>
+<li><p>Define a suitable <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> for your <code class="docutils literal notranslate"><span class="pre">Component</span></code></p></li>
+<li><p>Bind the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> to your <code class="docutils literal notranslate"><span class="pre">Component</span></code> to build multiple <code class="docutils literal notranslate"><span class="pre">Component</span></code> instances</p></li>
+<li><p>Register the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> via a key.</p></li>
+<li><p>Use the <code class="docutils literal notranslate"><span class="pre">key</span></code> to build re-use and build your Component.</p></li>
+</ol>
+</section>
+<section id="install">
+<h1>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h1>
+<p>Three methods are supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">setup.py</span></code>: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></p></li>
+<li><p><em>pip</em> package: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cinnamon-core</span></code></p></li>
+</ul>
+</section>
+<section id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h1>
+<p>TODO</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Motivational Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">cinnamon-core</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Motivational Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="intro.html" title="next chapter">Motivational Intro</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Federico Ruggeri.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
