@@ -20,14 +20,6 @@ cinnamon\_core.utility.logging\_utility module
    :undoc-members:
    :show-inheritance:
 
-cinnamon\_core.utility.path\_utility module
--------------------------------------------
-
-.. automodule:: cinnamon_core.utility.path_utility
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 cinnamon\_core.utility.pickle\_utility module
 ---------------------------------------------
 
