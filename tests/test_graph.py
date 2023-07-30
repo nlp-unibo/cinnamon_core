@@ -142,7 +142,7 @@ class ConfigC(Configuration):
                    variants=[1, 2, 3, 4])
         config.add(name='child',
                    value=RegistrationKey(name='config_d', namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 
@@ -161,7 +161,7 @@ class ConfigD(Configuration):
                    variants=[False, True])
         config.add(name='child',
                    value=RegistrationKey(name='config_e', namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 
@@ -219,7 +219,7 @@ class ConfigF(Configuration):
 
         config.add(name='child',
                    value=RegistrationKey(name='config_g', namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 
@@ -234,7 +234,7 @@ class ConfigG(Configuration):
 
         config.add(name='child',
                    value=RegistrationKey(name='config_f', namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 
@@ -266,7 +266,7 @@ class ConfigH(Configuration):
 
         config.add(name='child',
                    value=RegistrationKey(name='test', namespace='external'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 
@@ -315,7 +315,7 @@ class ConfigJ(Configuration):
 
         config.add(name='child',
                    value=RegistrationKey(name='config_i', tags={'var1'}, namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 

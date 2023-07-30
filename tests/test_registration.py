@@ -209,7 +209,7 @@ def test_retrieve_built_component(
     component = Registry.build_component_from_key(registration_key=key)
     Registry.register_built_component_from_key(registration_key=key,
                                                component=component)
-    retrieved = Registry.retrieve_built_component_from_key(registration_key=key)
+    retrieved = Registry.retrieve_component_instance_from_key(registration_key=key)
     assert component == retrieved
 
 

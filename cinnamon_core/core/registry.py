@@ -423,7 +423,7 @@ class Registry:
     @staticmethod
     def build_component_from_key(
             registration_key: Registration,
-            register_built_component: bool = False,
+            register_component_instance: bool = False,
             build_args: Optional[Dict] = None
     ) -> Component:
         """
@@ -431,8 +431,8 @@ class Registry:
 
         Args:
             registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
-            register_built_component: if True, it automatically registers the built ``Component`` in the registry.
-            build_args
+            register_component_instance: if True, it automatically registers the ``Component`` instance in the registry.
+            build_args: additional optional build arguments
 
         Returns:
             The built ``Component`` instance
@@ -458,12 +458,15 @@ class Registry:
         if registration_key not in Registry.BINDINGS:
             raise NotBoundException(registration_key=registration_key)
 
+        built_config.post_build()
+        built_config.validate()
+
         registered_component = Registry.BINDINGS[registration_key]
         build_args = build_args if build_args else {}
         built_component = registered_component(config=built_config,
                                                **build_args)
 
-        if register_built_component:
+        if register_component_instance:
             Registry.register_built_component_from_key(component=built_component,
                                                        registration_key=registration_key)
         return built_component
@@ -501,7 +504,7 @@ class Registry:
                                           tags=tags,
                                           namespace=namespace)
         return Registry.build_component_from_key(registration_key=config_regr_key,
-                                                 register_built_component=register_built_component,
+                                                 register_component_instance=register_built_component,
                                                  build_args=build_args)
 
     @staticmethod
@@ -575,7 +578,7 @@ class Registry:
         Registry.BUILT_REGISTRY[registration_key] = component
 
     @staticmethod
-    def register_built_component(
+    def register_component_instance(
             component: Component,
             name: str,
             namespace: str = 'generic',
@@ -583,7 +586,7 @@ class Registry:
             is_default: bool = False
     ):
         """
-        Registers a built ``Component`` via its corresponding ``Configuration`` ``RegistrationKey`` (implicitly).
+        Registers a ``Component`` instance via its associated ``RegistrationKey`` in implicit format.
 
         Args:
             component: a ``Component`` instance
@@ -605,11 +608,11 @@ class Registry:
                                                    registration_key=built_regr_key)
 
     @staticmethod
-    def retrieve_built_component_from_key(
+    def retrieve_component_instance_from_key(
             registration_key: Registration
     ) -> Component:
         """
-        Retrieves a built ``Component`` instance from its corresponding ``Configuration`` ``RegistrationKey``.
+        Retrieves a ``Component`` instance from its associated ``RegistrationKey`` in explicit format.
 
         Args:
             registration_key: the ``RegistrationKey`` used to register the ``Configuration`` class.
@@ -625,15 +628,14 @@ class Registry:
         return Registry.BUILT_REGISTRY[registration_key]
 
     @staticmethod
-    def retrieve_built_component(
+    def retrieve_component_instance(
             name: str,
             namespace: str = 'generic',
             tags: Tag = None,
             is_default: bool = False
     ) -> Component:
         """
-        Retrieves a built ``Component`` instance from its corresponding ``Configuration``
-        ``RegistrationKey`` (implicitly).
+        Retrieves a ``Component`` instance from its associated ``RegistrationKey`` in implicit format.
 
         Args:
             name: the ``name`` field of ``RegistrationKey``
@@ -650,7 +652,7 @@ class Registry:
         config_regr_key = RegistrationKey(name=name,
                                           tags=tags,
                                           namespace=namespace)
-        return Registry.retrieve_built_component_from_key(registration_key=config_regr_key)
+        return Registry.retrieve_component_instance_from_key(registration_key=config_regr_key)
 
     # Configuration
 

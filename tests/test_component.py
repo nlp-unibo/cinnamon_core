@@ -106,7 +106,7 @@ def test_save_and_load_nested():
     child_config.add(name='y', value='some string')
     child = Component(config=child_config)
 
-    config.add(name='child', value=child, is_registration=True)
+    config.add(name='child', value=child, is_child=True)
     component = Component(config=config, from_component=True)
 
     serialization_path = Path('.').resolve()

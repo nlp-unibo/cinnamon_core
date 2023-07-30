@@ -21,23 +21,14 @@ class Component:
     def __init__(
             self,
             config: Configuration,
-            from_component: bool = False
     ):
         """
         ``Component`` constructor.
 
         Args:
             config: the ``Configuration`` instance bound to this ``Component``.
-            from_component: if True, ``Configuration.post_build()`` method is invoked along with corresponding
-            conditions evaluation.
         """
-
         self.config = config
-
-        if not from_component:
-            self.config.post_build()
-
-        self.config.validate()
 
     def __getattr__(
             self,
@@ -218,7 +209,7 @@ class Component:
 
         component = core.registry.Registry.build_component_from_key(
             registration_key=registration_key,
-            register_built_component=register_built_component,
+            register_component_instance=register_built_component,
             build_args=build_args)
         check_type('component', component, cls)
         component = cast(type(cls), component)
@@ -266,7 +257,7 @@ class Component:
         return component
 
     @classmethod
-    def retrieve_built_component_from_key(
+    def retrieve_component_instance_from_key(
             cls: Type[C],
             registration_key: core.registry.Registration
     ) -> C:
@@ -281,14 +272,14 @@ class Component:
             The built ``Component`` instance
         """
 
-        component = core.registry.Registry.retrieve_built_component_from_key(
+        component = core.registry.Registry.retrieve_component_instance_from_key(
             registration_key=registration_key)
         check_type('component', component, cls)
         component = cast(type(cls), component)
         return component
 
     @classmethod
-    def retrieve_built_component(
+    def retrieve_component_instance(
             cls: Type[C],
             name: str,
             namespace: str = 'generic',
@@ -309,10 +300,10 @@ class Component:
             The built ``Component`` instance
         """
 
-        component = core.registry.Registry.retrieve_built_component(name=name,
-                                                                    tags=tags,
-                                                                    namespace=namespace,
-                                                                    is_default=is_default)
+        component = core.registry.Registry.retrieve_component_instance(name=name,
+                                                                       tags=tags,
+                                                                       namespace=namespace,
+                                                                       is_default=is_default)
         check_type('component', component, cls)
         component = cast(type(cls), component)
         return component

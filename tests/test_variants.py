@@ -28,11 +28,11 @@ class ParentConfig(Configuration):
         config.add(name='child_A',
                    value=RegistrationKey(name='config_a',
                                          namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
         config.add(name='child_B',
                    value=RegistrationKey(name='config_b',
                                          namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
         return config
 
 
@@ -47,7 +47,7 @@ class NestedChild(Configuration):
         config.add(name='child',
                    value=RegistrationKey(name='config_c',
                                          namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
 
         return config
 
@@ -99,7 +99,7 @@ class ConfigA(Configuration):
 
         config.add(name='param_1', value=True, type_hint=bool, variants=[False, True])
         config.add(name='child', value=RegistrationKey(name='config_b',
-                                                       namespace='testing'), is_registration=True)
+                                                       namespace='testing'), is_child=True)
         return config
 
 
@@ -113,7 +113,7 @@ class ConfigB(Configuration):
 
         config.add(name='param_1', value=1, type_hint=int, variants=[1, 2])
         config.add(name='child', value=RegistrationKey(name='config_c',
-                                                       namespace='testing'), is_registration=True)
+                                                       namespace='testing'), is_child=True)
 
         return config
 
@@ -171,7 +171,7 @@ class ConfigD(Configuration):
         config.add(name='child',
                    value=RegistrationKey(name='config_e',
                                          namespace='testing'),
-                   is_registration=True)
+                   is_child=True)
         return config
 
 

@@ -141,7 +141,7 @@ def test_registration(
     config.add(name='child',
                value=RegistrationKey(name='component',
                                      namespace='testing'),
-               is_registration=True)
+               is_child=True)
     config.validate()
 
 
@@ -157,7 +157,7 @@ def test_registration_post_build(
                value=RegistrationKey(name='component',
                                      namespace='testing'),
                build_type_hint=Component,
-               is_registration=True)
+               is_child=True)
     config.post_build()
     config.validate(strict=False)
     assert type(config.child) == Component
@@ -175,7 +175,7 @@ def test_registration_post_build_mismatch(
                value=RegistrationKey(name='component',
                                      namespace='testing'),
                build_type_hint=str,
-               is_registration=True)
+               is_child=True)
     config.post_build()
     with pytest.raises(ValidationFailureException):
         config.validate()

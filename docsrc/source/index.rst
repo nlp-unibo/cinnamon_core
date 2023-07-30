@@ -15,14 +15,8 @@ De-coupling
 Re-use
    of code logic with effort
 
-How it works
+Background
 ===============================================
-
-It is always better to use an example to quickly explain how cinnamon works.
-
-Example
-------------------------------------------------
-
 
 Consider a code logic that has to load some data.
 
@@ -46,7 +40,7 @@ Hypothetically, we would define multiple data loaders:
    data_loader_2 = DataLoader(folder_name='*folder_name2*')
    ...
 
-Now, if the data loader code block is used in a wider-scope project, we require some code modularity to avoid
+Now, if the data loader code block is used in a project, we require some code modularity to avoid
 defining several versions of the same script.
 One common solution is to rely on **configuration files** (e.g., JSON file).
 
@@ -81,9 +75,9 @@ Well, cinnamon keeps this <configuration, code logic> dichotomy where a configur
          return config
 
 
-Cinnamon allow high-level configuration definition (constraints, type-checking, description, variants, etc...)
+Cinnamon allows **high-level configuration definition** (constraints, type-checking, description, variants, etc...)
 
-To quickly load any configuration instance for our data loader code logic, we
+To quickly load any instance of our data loader code logic, we
 
 register
    the configuration via a **registration key**
@@ -114,6 +108,8 @@ build
 
 That's it!
 
+This is all of you have to understand in order to use cinnamon.
+
 Features
 ===============================================
 
@@ -127,7 +123,7 @@ Features
    ``cinnamon`` is shipped in **several small packages** to meet different requirements
 
 **Community-based**
-   the ``Component`` and ``Configuration`` you define can be **imported/exported** from/to other users!
+   the ``Component`` and ``Configuration`` you define can be **imported from/exported to** other users and project!
 
 **Flexible**
    ``cinnamon`` imposes **minimal APIs** for a quick learning curve.
@@ -150,7 +146,7 @@ git
 Getting started
 ===============================================
 
-   :ref: `registry`
+   :ref: `registration`
    :ref: `conf_comp`
    :ref: `data_flow`
 
