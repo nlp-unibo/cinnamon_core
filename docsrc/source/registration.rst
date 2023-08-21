@@ -1,19 +1,19 @@
-.. registration
+.. _registration:
 
-How to register components and configurations
-=============================================
+Registration APIs
+*********************************************
 
-Let's recap the core concepts of ``cinnamon``.
+Let's first recap the core concepts of ``cinnamon``.
 
-Configuration
+**Configuration**
     defines all hyper-parameters and conditions of a Component
 
-Component
+**Component**
     defines a code logic
 
-Cinnamon allows to quickly **retrieve**, **build** and **re-use** a Component via a set of registration APIs.
+Cinnamon allows to quickly **retrieve**, **build** and **re-use** a ``Component`` via a set of registration APIs.
 
-Recall, our data loader recurring example.
+Consider our data loader recurring example.
 
 .. code-block:: python
 
@@ -35,18 +35,21 @@ Recall, our data loader recurring example.
 
             return config
 
+*********************************************
 Registering a Configuration
-=============================================
+*********************************************
 
 Suppose we have a <``Configuration``, ``Component``> pair (e.g., <``DataLoaderConfig``, ``DataLoader``>).
 
 We first store the ``Configuration`` in the cinnamon's ``Registry`` to memorize it.
 
-We do so by defining a ``RegistrationKey`` to uniquely access to the ``Configuration``
+We do so by defining a ``RegistrationKey`` to uniquely access to the ``Configuration``.
 
 .. image:: /img/registration_with_key.png
+    :scale: 60%
+    :align: center
 
-At code level, we register the ``DataLoaderConfig`` as follows
+We register the ``DataLoaderConfig`` as follows:
 
 .. code-block:: python
 
@@ -79,12 +82,13 @@ or
 
 In particular, the ``get_default()`` method is invoked to build the ``Configuration`` instance.
 
+*********************************************
 Custom Configuration instance building
----------------------------------------------
+*********************************************
 
-The ``Configuration.get_default()`` usually defines the general structure of a ``Configuration`` (see TODO link for more details).
+The ``Configuration.get_default()`` defines the general structure of a ``Configuration`` (see :ref:`configuration` for more details).
 
-What if we want to build a ``Configuration`` instance via a custom function?
+What if we want to build a ``Configuration`` instance via a **custom function**?
 
 Suppose the following ``DataLoaderConfig``:
 
@@ -110,9 +114,9 @@ Suppose the following ``DataLoaderConfig``:
             return config
 
 
-Suppose, we want to register our ``Configuration`` such that its instances are built via the ``limited_samples_variant()`` method.
+We want to register our ``Configuration`` such that its instances are built via the ``limited_samples_variant()`` method.
 
-We specify the ``DataLoaderConfig.limited_samples_variant`` constructor method when registering the ``DataLoaderConfig``.
+We do so by specifying the ``DataLoaderConfig.limited_samples_variant`` constructor method when registering the ``DataLoaderConfig``.
 
 .. code-block:: python
 
@@ -121,23 +125,25 @@ We specify the ``DataLoaderConfig.limited_samples_variant`` constructor method w
                                config_constructor=DataLoaderConfig.limited_samples_variant)
 
 
+*********************************************
 Registration Key
-=============================================
+*********************************************
 
 A ``RegistrationKey`` is a unique compound identifier that allows to quickly retrieve a ``Configuration`` from the
 ``Registry``.
 
 In particular, a ``RegistrationKey`` consists of
 
-    **name**: a generic name to identify the type of configuration (and corresponding bound component, if any). For instance, 'data_loader' for a data loader.
+*   **name**: a generic name to identify the type of configuration (and corresponding bound component, if any). For instance, 'data_loader' for a data loader.
 
-    **[Optional] tags**: a set of string tags to identify the configuration. For instance, two data loaders will have the same name but different tags.
+*   **[Optional] tags**: a set of string tags to identify the configuration. For instance, two data loaders will have the same name but different tags.
 
-    **namespace**: the namespace to which the configuration belongs to. For instance, two configurations pointing to the same deep learning model, one written in Tensorflow and the other one in Pytorch, have the same name and tags but different namespace.
+*   **namespace**: the namespace to which the configuration belongs to. For instance, two configurations pointing to the same deep learning model, one written in Tensorflow and the other one in Pytorch, have the same name and tags but different namespace.
 
 
+*********************************************
 Binding a Configuration to a Component
-=============================================
+*********************************************
 
 Once we have registered our ``Configuration``, we need to **bind** it to a ``Component`` to automatically build
 ``Component`` instances.
@@ -146,6 +152,8 @@ We instruct the ``Registry`` to perform the binding operation by leveraging the 
 store our ``Configuration``.
 
 .. image:: img/binding_with_key.png
+    :scale: 60%
+    :align: center
 
 In our data loader example, we perform the binding between the registered ``DataLoaderConfig`` and ``DataLoader`` as follows
 
@@ -183,8 +191,9 @@ If the ``DataLoaderConfig`` has some hyper-parameter variants to take into accou
                                    namespace='showcase')
 
 
+*********************************************
 Building a Component
-=============================================
+*********************************************
 
 Once a ``Configuration`` is bound to a ``Component``, the ``Registry`` can automatically build a ``Component`` instance
 by using the associated ``RegistrationKey``.
@@ -203,11 +212,11 @@ or
 
 .. note::
     The ``Registry`` deals with ``Configuration`` and ``Component`` **classes** and **not** class instances.
-    Classes are stored as ''factories'' for building class instances on the fly.
+    Classes are stored as ''factories'' for building class instances on-the-fly.
 
-
+*********************************************
 Retrieving a Component
-=============================================
+*********************************************
 
 The ``Registry`` can also retrieve the ``Component`` class instead of building an instance
 
@@ -224,15 +233,16 @@ or
     component_class = Registry.retrieve_component_from_key(registration_key=key)
 
 
+**************************************************
 Registering and retrieving a Component instance
-=============================================
+**************************************************
 
 A ``Component`` instance can be registered as well via a ``RegistrationKey``.
 
 .. note::
     The same ``RegistrationKey`` used to bind the ``Component`` can be used as well.
 
-Such a functionality is particularly useful to have access to a ``Component`` instance anywhere.
+Such a functionality is particularly useful to have access to a ``Component`` instance anywhere in the code.
 
 .. code-block:: python
 
@@ -274,8 +284,9 @@ or
     key = RegistrationKey(name='data_loader', namespace='showcasing')
     component = Registry.retrieve_component_instance_from_key(registration_key=key)
 
+*********************************************
 Empty Configuration
-=============================================
+*********************************************
 
 In some cases, a ``Component`` may not have any hyper-parameters.
 
@@ -289,21 +300,22 @@ We can use the ``Configuration`` class to bind an empty ``Configuration``.
                           namespace='showcasing')
 
 
+*********************************************
 Tl;dr (Too long; didn't read)
-=============================================
+*********************************************
 
-- Define your ``Component`` (code logic)
-- Define its corresponding ``Configuration`` (one or more)
-- Register the ``Configuration`` to the ``Registry`` via a ``RegistrationKey``
-- The ``RegistrationKey`` is a compound string-based unique identifier
-- Bind the ``Configuration`` to its ``Component`` via the ``RegistrationKey``
-- Build ``Component`` instances via the ``RegistrationKey``
+- Define your ``Component`` (code logic).
+- Define its corresponding ``Configuration`` (one or more).
+- Register the ``Configuration`` to the ``Registry`` via a ``RegistrationKey``.
+- The ``RegistrationKey`` is a compound string-based unique identifier.
+- Bind the ``Configuration`` to its ``Component`` via the ``RegistrationKey``.
+- Build ``Component`` instances via the ``RegistrationKey``.
 
 **Congrats! This is 99% of cinnamon!**
 
-
+*********************************************
 How to use registration APIs
-=============================================
+*********************************************
 
 You may be wondering **how** to properly use these registration APIs...
 
@@ -311,4 +323,4 @@ Long story short, you **don't need** to contaminate your code with registration 
 
 Cinnamon supports a **specific code organization** to **automatically** address all registration related operations while keeping a clean code organization.
 
-See TODO LINK for more details
+See :doc:`dependencies` for more details.

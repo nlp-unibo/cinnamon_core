@@ -3,17 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Cinnamon Core Package (```cinnamon-core```)
+Cinnamon Core Package
 ================================================
 
 Cinnamon is a simple framework for general-purpose configuration and code logic de-coupling.
 It was developed to offer two main functionalities:
 
-De-coupling
+**De-coupling**
    a code logic from its regulating parameters
 
-Re-use
+**Re-use**
    of code logic with effort
+
 
 Background
 ===============================================
@@ -79,7 +80,7 @@ Cinnamon allows **high-level configuration definition** (constraints, type-check
 
 To quickly load any instance of our data loader code logic, we
 
-register
+**register**
    the configuration via a **registration key**
 
    .. code-block:: python
@@ -88,7 +89,7 @@ register
       Registry.add_configuration_variants_from_key(config_class=DataLoaderConfig,
                                  key=key)
 
-bind
+**bind**
    the configuration to its code logic: ``DataLoaderConfig`` --> ``DataLoader``
 
    .. code-block:: python
@@ -97,7 +98,7 @@ bind
                     component_class=DataLoader,
                     key=key)
 
-build
+**build**
    the ``DataLoader`` code logic with a specific configuration instance via the used **registration key**
 
    .. code-block:: python
@@ -106,9 +107,7 @@ build
       data_loader = Registry.build_component(key=variant_key)
 
 
-That's it!
-
-This is all of you have to understand in order to use cinnamon.
+**That's it!** This is all of you need to use cinnamon.
 
 Features
 ===============================================
@@ -120,7 +119,7 @@ Features
    ``cinnamon`` is a small library that acts as a **high-level wrapper** for your projects.
 
 **Modular**
-   ``cinnamon`` is shipped in **several small packages** to meet different requirements
+   ``cinnamon`` is shipped in **several small packages** to meet different requirements.
 
 **Community-based**
    the ``Component`` and ``Configuration`` you define can be **imported from/exported to** other users and project!
@@ -136,19 +135,23 @@ Install
 pip
    .. code-block:: bash
 
-      run pip install cinnamon-core
+      pip install cinnamon-core
 
 git
    .. code-block:: bash
 
-      clone https://github.com/federicoruggeri/cinnamon_core
+      git clone https://github.com/federicoruggeri/cinnamon_core
 
-Getting started
-===============================================
-
-   :ref: `registration`
-   :ref: `conf_comp`
-   :ref: `data_flow`
 
 .. toctree::
    :maxdepth: 4
+   :hidden:
+   :caption: Contents:
+   :titlesonly:
+
+   Registration <registration.rst>
+   Code Organization <dependencies.rst>
+   Configuration <configuration.rst>
+   Component <component.rst>
+   Data <data.rst>
+   cinnamon-core <cinnamon_core.rst>
