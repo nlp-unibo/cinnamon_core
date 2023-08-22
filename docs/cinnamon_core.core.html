@@ -1,38 +1,162 @@
 
-<!DOCTYPE html>
 
-<html lang="en">
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xml:lang="" lang="" version="-//W3C//DTD XHTML 1.1//EN" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="">
+    <link rel="icon" type="image/x-icon" href="">
 
-    <title>cinnamon_core.core package &#8212; cinnamon-core 0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
+  <title>cinnamon_core.core package &mdash; cinnamon-core 0.1 documentation</title>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+  
+
+  
+
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'/>
+
+
+  <link rel="stylesheet" href="_static/css/img.css" type="text/css"/>
+  
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/css/pdj.css" type="text/css" />
+  
+
+  
+
+  <link rel="stylesheet" href="_static/css/darker.css" type="text/css" media="(prefers-color-scheme: dark)"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="cinnamon-core 0.1 documentation" href="index.html"/>
+        <link rel="up" title="cinnamon_core package" href="cinnamon_core.html"/>
+        <link rel="next" title="cinnamon_core.utility package" href="cinnamon_core.utility.html"/>
+        <link rel="prev" title="cinnamon_core package" href="cinnamon_core.html"/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="cache-control" content="public" />
+    <meta name="robots" content="follow, all" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Add jQuery library -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+    <script type="module" src="https://googlechromelabs.github.io/dark-mode-toggle/src/dark-mode-toggle.mjs"></script>
+
+  </head>
+
+  <body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+	
+        <a href="index.html" class="fa fa-home"> cinnamon-core </a>
+	
+	
+        <div role="search">
+	  
+	  <form id ="rtd-search-form" class="wy-form"
+		action="search.html" method="get">
+	    <input type="text" name="q" placeholder="Search docs" />
+	    <input type="hidden" name="check_keywords" value="yes" />
+	    <input type="hidden" name="area" value="default" />
+	  </form>
+	  
+	</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	
           
+          
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="registration.html">Registration APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#registering-a-configuration">Registering a Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#custom-configuration-instance-building">Custom Configuration instance building</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#registration-key">Registration Key</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#binding-a-configuration-to-a-component">Binding a Configuration to a Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#building-a-component">Building a Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#retrieving-a-component">Retrieving a Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#registering-and-retrieving-a-component-instance">Registering and retrieving a Component instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#empty-configuration">Empty Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#tl-dr-too-long-didn-t-read">Tl;dr (Too long; didn’t read)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html#how-to-use-registration-apis">How to use registration APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Code Organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html#registration-calls">Registration calls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html#dependency-dag">Dependency DAG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dependencies.html#external-registrations">External registrations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#parameter">Parameter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html#functionalities">Functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html#adding-conditions">Adding conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html#validating-a-configuration">Validating a Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html#getting-a-configuration-delta-copy">Getting a Configuration (delta) copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html#configuration-variants">Configuration variants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html#nested-configurations">Nested Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component.html">Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component.html#run">Run</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component.html#save-load">Save &amp; Load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component.html#find">Find</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html#adding-conditions">Adding Conditions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="cinnamon_core.html">cinnamon-core</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cinnamon_core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cinnamon_core.html#module-cinnamon_core">Module contents</a></li>
+</ul>
+</li>
+</ul>
 
-          <div class="body" role="main">
-            
+          
+        
+
+      </div>
+      &nbsp;
+    </nav>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      <nav class="wy-nav-top" id="barra-mobile" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">cinnamon-core </a>
+      </nav>
+
+      <div class="wy-nav-content">
+	<div class="fundo-claro">
+	</div>
+	<div class="fundo-escuro">
+	</div>
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+	    
+	    <!-- <ul class="wy-breadcrumbs"> -->
+	    <!--   <li><a href="#">Docs</a> &raquo;</li> -->
+
+	    <!--   <li>Features</li> -->
+	    <!--   <li class="wy-breadcrumbs-aside"> -->
+
+	    <!-- 	<a href="_sources/index.txt" rel="nofollow"> View page source</a> -->
+
+	    <!--   </li> -->
+	    <!-- </ul> -->
+	    <!-- <hr/> -->
+	  </div>
+          <div role="main" class="">
+
+	    <div id="content" class="hfeed entry-container hentry">
+      	<div id="dark-mode-toggle-container">
+	  <dark-mode-toggle appearance="toggle" dark="switch to light mode" light="switch to dark mode">
+	  </dark-mode-toggle>
+	</div>
   <section id="cinnamon-core-core-package">
 <h1>cinnamon_core.core package<a class="headerlink" href="#cinnamon-core-core-package" title="Permalink to this heading">¶</a></h1>
 <section id="submodules">
@@ -42,7 +166,7 @@
 <span id="cinnamon-core-core-component-module"></span><h2>cinnamon_core.core.component module<a class="headerlink" href="#module-cinnamon_core.core.component" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cinnamon_core.core.component.Component">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cinnamon_core.core.component.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_component</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cinnamon_core.core.component.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Generic component class.
 Components generally receive data and produce other data as output: i.e., a data transformation process.</p>
@@ -159,8 +283,8 @@ parameters’ value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cinnamon_core.core.component.Component.retrieve_built_component">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_built_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component.retrieve_built_component" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cinnamon_core.core.component.Component.retrieve_component_instance">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_component_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component.retrieve_component_instance" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Syntactic sugar for retrieving a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> in implicit format.</p>
 </dd>
@@ -181,8 +305,8 @@ parameters’ value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cinnamon_core.core.component.Component.retrieve_built_component_from_key">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_built_component_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component.retrieve_built_component_from_key" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="cinnamon_core.core.component.Component.retrieve_component_instance_from_key">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_component_instance_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component.retrieve_component_instance_from_key" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Syntactic sugar for retrieving a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code>.</p>
 </dd>
@@ -975,14 +1099,14 @@ to the given <code class="docutils literal notranslate"><span class="pre">Compon
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.build_component_from_key">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_component_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_built_component</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.build_component_from_key" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_component_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_component_instance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.build_component_from_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its bounded <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> via the given <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>registration_key</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#cinnamon_core.core.registry.RegistrationKey" title="cinnamon_core.core.registry.RegistrationKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationKey</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> used to register the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> class.</p></li>
-<li><p><strong>register_built_component</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if True, it automatically registers the built <code class="docutils literal notranslate"><span class="pre">Component</span></code> in the registry.</p></li>
-<li><p><strong>build_args</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]) – </p></li>
+<li><p><strong>register_component_instance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if True, it automatically registers the <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance in the registry.</p></li>
+<li><p><strong>build_args</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]) – additional optional build arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1163,17 +1287,14 @@ to the given <code class="docutils literal notranslate"><span class="pre">Compon
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.register_built_component">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register_built_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.register_built_component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registers a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> via its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> (implicitly).</p>
+<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.register_built_component_from_key">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register_built_component_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.register_built_component_from_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> via its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>component</strong> (<a class="reference internal" href="#cinnamon_core.core.component.Component" title="cinnamon_core.core.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a>) – a <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance</p></li>
-<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">name</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
-<li><p><strong>tags</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – the <code class="docutils literal notranslate"><span class="pre">tags</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
-<li><p><strong>namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">namespace</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
-<li><p><strong>is_default</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if True, the tag <code class="docutils literal notranslate"><span class="pre">default</span></code> is added to <code class="docutils literal notranslate"><span class="pre">tags</span></code></p></li>
+<li><p><strong>registration_key</strong> (<a class="reference internal" href="#cinnamon_core.core.registry.RegistrationKey" title="cinnamon_core.core.registry.RegistrationKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationKey</span></code></a>) – the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> used to bind the <code class="docutils literal notranslate"><span class="pre">Component</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -1183,14 +1304,17 @@ to the given <code class="docutils literal notranslate"><span class="pre">Compon
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.register_built_component_from_key">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register_built_component_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.register_built_component_from_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registers a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> via its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code>.</p>
+<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.register_component_instance">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register_component_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.register_component_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance via its associated <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> in implicit format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>component</strong> (<a class="reference internal" href="#cinnamon_core.core.component.Component" title="cinnamon_core.core.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a>) – a <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance</p></li>
-<li><p><strong>registration_key</strong> (<a class="reference internal" href="#cinnamon_core.core.registry.RegistrationKey" title="cinnamon_core.core.registry.RegistrationKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationKey</span></code></a>) – the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> used to bind the <code class="docutils literal notranslate"><span class="pre">Component</span></code></p></li>
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">name</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
+<li><p><strong>tags</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – the <code class="docutils literal notranslate"><span class="pre">tags</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
+<li><p><strong>namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">namespace</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
+<li><p><strong>is_default</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if True, the tag <code class="docutils literal notranslate"><span class="pre">default</span></code> is added to <code class="docutils literal notranslate"><span class="pre">tags</span></code></p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -1252,46 +1376,6 @@ In particular, a <code class="docutils literal notranslate"><span class="pre">Co
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.retrieve_built_component">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_built_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.retrieve_built_component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieves a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>
-<code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> (implicitly).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">name</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
-<li><p><strong>tags</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – the <code class="docutils literal notranslate"><span class="pre">tags</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
-<li><p><strong>namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">namespace</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
-<li><p><strong>is_default</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if True, the tag <code class="docutils literal notranslate"><span class="pre">default</span></code> is added to <code class="docutils literal notranslate"><span class="pre">tags</span></code></p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#cinnamon_core.core.component.Component" title="cinnamon_core.core.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.retrieve_built_component_from_key">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_built_component_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.retrieve_built_component_from_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieves a built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its corresponding <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>registration_key</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#cinnamon_core.core.registry.RegistrationKey" title="cinnamon_core.core.registry.RegistrationKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationKey</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> used to register the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> class.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#cinnamon_core.core.component.Component" title="cinnamon_core.core.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.retrieve_component">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.retrieve_component" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves the <code class="docutils literal notranslate"><span class="pre">Component</span></code> class bound to the given <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> (implicit).</p>
@@ -1331,6 +1415,45 @@ In particular, a <code class="docutils literal notranslate"><span class="pre">Co
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#cinnamon_core.core.registry.NotBoundException" title="cinnamon_core.core.registry.NotBoundException"><strong>NotBoundException</strong></a> – if the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> is not bound to any <code class="docutils literal notranslate"><span class="pre">Component</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.retrieve_component_instance">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_component_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'generic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.retrieve_component_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its associated <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> in implicit format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">name</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
+<li><p><strong>tags</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – the <code class="docutils literal notranslate"><span class="pre">tags</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
+<li><p><strong>namespace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the <code class="docutils literal notranslate"><span class="pre">namespace</span></code> field of <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code></p></li>
+<li><p><strong>is_default</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if True, the tag <code class="docutils literal notranslate"><span class="pre">default</span></code> is added to <code class="docutils literal notranslate"><span class="pre">tags</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#cinnamon_core.core.component.Component" title="cinnamon_core.core.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cinnamon_core.core.registry.Registry.retrieve_component_instance_from_key">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_component_instance_from_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registration_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.registry.Registry.retrieve_component_instance_from_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance from its associated <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> in explicit format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>registration_key</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#cinnamon_core.core.registry.RegistrationKey" title="cinnamon_core.core.registry.RegistrationKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationKey</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> used to register the <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> class.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#cinnamon_core.core.component.Component" title="cinnamon_core.core.component.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The built <code class="docutils literal notranslate"><span class="pre">Component</span></code> instance</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1424,71 +1547,78 @@ In particular, a <code class="docutils literal notranslate"><span class="pre">Co
 </section>
 
 
-          </div>
-          
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">cinnamon-core</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Motivational Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2023, Federico Ruggeri.
+	    </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+        <a href="cinnamon_core.utility.html" class="btn btn-neutral float-right" title="cinnamon_core.utility package">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      |
-      <a href="_sources/cinnamon_core.core.rst.txt"
-          rel="nofollow">Page source</a>
+      
+        <a href="cinnamon_core.html" class="btn btn-neutral" title="cinnamon_core package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
-    
+  <hr/>
 
-    
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, Federico Ruggeri.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/jucacrispim/sphinx_pdj_theme">theme</a> provided by <a href="https://poraodojuca.dev">Porão do Juca</a>.
+
+</footer>
+	</div>
+	</div>
+	  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+    <script type="text/javascript" src="_static/documentation_options.js">
+
+    </script>
+    <script type="text/javascript" src="_static/jquery.js">
+
+    </script>
+    <script type="text/javascript" src="_static/underscore.js">
+
+    </script>
+    <script type="text/javascript" src="_static/_sphinx_javascript_frameworks_compat.js">
+
+    </script>
+    <script type="text/javascript" src="_static/doctools.js">
+
+    </script>
+    <script type="text/javascript" src="_static/sphinx_highlight.js">
+
+    </script>
+
+  
+
+   <script type="text/javascript"
+           src="_static/js/theme.js"></script>
+
+   <script type="text/javascript"
+           src="_static/js/pdj.js"></script>
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
   </body>
 </html>

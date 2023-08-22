@@ -1,0 +1,338 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xml:lang="" lang="" version="-//W3C//DTD XHTML 1.1//EN" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="">
+    <link rel="icon" type="image/x-icon" href="">
+
+  
+  <title>Code Organization &mdash; cinnamon-core 0.1 documentation</title>
+  
+
+  
+
+  
+
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'/>
+
+
+  <link rel="stylesheet" href="_static/css/img.css" type="text/css"/>
+  
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/css/pdj.css" type="text/css" />
+  
+
+  
+
+  <link rel="stylesheet" href="_static/css/darker.css" type="text/css" media="(prefers-color-scheme: dark)"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="cinnamon-core 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Configuration" href="configuration.html"/>
+        <link rel="prev" title="Registration APIs" href="registration.html"/>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="cache-control" content="public" />
+    <meta name="robots" content="follow, all" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Add jQuery library -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+    <script type="module" src="https://googlechromelabs.github.io/dark-mode-toggle/src/dark-mode-toggle.mjs"></script>
+
+  </head>
+
+  <body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+	
+        <a href="index.html" class="fa fa-home"> cinnamon-core </a>
+	
+	
+        <div role="search">
+	  
+	  <form id ="rtd-search-form" class="wy-form"
+		action="search.html" method="get">
+	    <input type="text" name="q" placeholder="Search docs" />
+	    <input type="hidden" name="check_keywords" value="yes" />
+	    <input type="hidden" name="area" value="default" />
+	  </form>
+	  
+	</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	
+          
+          
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="registration.html">Registration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code Organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="component.html">Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cinnamon_core.html">cinnamon-core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cinnamon_core.core.html">cinnamon_core.core package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cinnamon_core.utility.html">cinnamon_core.utility package</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+
+      </div>
+      &nbsp;
+    </nav>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      <nav class="wy-nav-top" id="barra-mobile" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">cinnamon-core </a>
+      </nav>
+
+      <div class="wy-nav-content">
+	<div class="fundo-claro">
+	</div>
+	<div class="fundo-escuro">
+	</div>
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+	    
+	    <!-- <ul class="wy-breadcrumbs"> -->
+	    <!--   <li><a href="#">Docs</a> &raquo;</li> -->
+
+	    <!--   <li>Features</li> -->
+	    <!--   <li class="wy-breadcrumbs-aside"> -->
+
+	    <!-- 	<a href="_sources/index.txt" rel="nofollow"> View page source</a> -->
+
+	    <!--   </li> -->
+	    <!-- </ul> -->
+	    <!-- <hr/> -->
+	  </div>
+          <div role="main" class="">
+
+	    <div id="content" class="hfeed entry-container hentry">
+      	<div id="dark-mode-toggle-container">
+	  <dark-mode-toggle appearance="toggle" dark="switch to light mode" light="switch to dark mode">
+	  </dark-mode-toggle>
+	</div>
+  <section id="code-organization">
+<span id="dependencies"></span><h1>Code Organization<a class="headerlink" href="#code-organization" title="Permalink to this heading">¶</a></h1>
+<p>We recommend organizing your code as follows</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>project_folder
+    configurations
+        folder containing ``Configuration`` scripts
+
+    components
+        folder containing ``Component`` scripts
+</pre></div>
+</div>
+<p>We also recommend using the same filename for &lt;<code class="docutils literal notranslate"><span class="pre">Configuration</span></code>, <code class="docutils literal notranslate"><span class="pre">Component</span></code>&gt; paired scripts for readability purposes.</p>
+<p>Recalling our data loader recurring example, we have</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project_folder</span>
+    <span class="n">configurations</span>
+        <span class="n">data_loader</span><span class="o">.</span><span class="n">py</span>
+
+    <span class="n">components</span>
+        <span class="n">data_loader</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>where</p>
+<dl>
+<dt>configurations/data_loader.py</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</dd>
+<dt>components/data_loader.py</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataLoaderConfig</span><span class="p">(</span><span class="n">Configuration</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;folder_name&#39;</span><span class="p">,</span>
+                   <span class="n">type_hint</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                   <span class="n">is_required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<section id="registration-calls">
+<h2>Registration calls<a class="headerlink" href="#registration-calls" title="Permalink to this heading">¶</a></h2>
+<p>Cinnamon <strong>requires</strong> registration APIs to be <strong>located</strong> in configuration script files, <strong>wrapped</strong> into python functions, and <strong>decorated</strong> with <code class="docutils literal notranslate"><span class="pre">&#64;register</span></code> decorator.</p>
+<p>For instance, <code class="docutils literal notranslate"><span class="pre">configurations/data_loader.py</span></code> should be as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataLoaderConfig</span><span class="p">(</span><span class="n">Configuration</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;folder_name&#39;</span><span class="p">,</span>
+                   <span class="n">type_hint</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                   <span class="n">is_required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config</span>
+
+<span class="nd">@register</span>
+<span class="k">def</span> <span class="nf">register_data_loaders</span><span class="p">():</span>
+    <span class="n">Registry</span><span class="o">.</span><span class="n">add_and_bind</span><span class="p">(</span><span class="n">config_class</span><span class="o">=</span><span class="n">DataLoaderConfig</span><span class="p">,</span>
+                          <span class="n">component_class</span><span class="o">=</span><span class="n">DataLoader</span><span class="p">,</span>
+                          <span class="n">name</span><span class="o">=</span><span class="s1">&#39;data_loader&#39;</span><span class="p">,</span>
+                          <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;showcase&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="dependency-dag">
+<h2>Dependency DAG<a class="headerlink" href="#dependency-dag" title="Permalink to this heading">¶</a></h2>
+<p>This code organization is meant to simplify registration burden while keeping high readability.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Registry</span></code> can be issued to look for all <code class="docutils literal notranslate"><span class="pre">&#64;register</span></code> decorated functions located in <code class="docutils literal notranslate"><span class="pre">configurations</span></code> folder
+to automatically execute them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Registry</span><span class="o">.</span><span class="n">check_registration_graph</span><span class="p">()</span>
+<span class="n">Registry</span><span class="o">.</span><span class="n">expand_and_resolve_registration</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The first function checks if the registration DAG is valid. Indeed, registration APIs like <code class="docutils literal notranslate"><span class="pre">add_and_bind</span></code> or <code class="docutils literal notranslate"><span class="pre">add_configuration</span></code> issue a <strong>delayed registration action</strong> to avoid conflicts.</p>
+<p>This means that the <code class="docutils literal notranslate"><span class="pre">Registry</span></code> first <strong>builds a graph</strong> where nodes are <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> and links denote a dependency. Then the <code class="docutils literal notranslate"><span class="pre">Registry</span></code> <strong>checks</strong> if the graph is a DAG (i.e., it has no loops)</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Registry</span></code> eventually issues all registration function calls in order according to the dependency graph (<code class="docutils literal notranslate"><span class="pre">expand_and_resolve_registration()</span></code>)</p>
+<p>The dependency DAG is necessary since the <code class="docutils literal notranslate"><span class="pre">Registry</span></code> doesn’t know the <strong>correct registration order</strong>.
+Additionally, as the number of registrations increases, it becomes cumbersome to keep track of all possible valid registration orders.</p>
+<p><strong>Cinnamon does that for you!</strong></p>
+<p>One can inspect the generated dependency DAG as follows</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Registry</span><span class="o">.</span><span class="n">show_dependencies</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This method generates a <code class="docutils literal notranslate"><span class="pre">dependencies.html</span></code> containing a graphical representation of the dependency DAG, useful for debugging.</p>
+</section>
+<section id="external-registrations">
+<h2>External registrations<a class="headerlink" href="#external-registrations" title="Permalink to this heading">¶</a></h2>
+<p>Cinnamon is a community project. This means that <strong>you</strong> are the main contributor.</p>
+<p>In many situations, you may need to import other’s work: external configurations and components.</p>
+<p>Cinnamon supports loading registration function calls that are external to your project’s <code class="docutils literal notranslate"><span class="pre">configurations</span></code> folder.
+Moreover, you can also build your <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> and <code class="docutils literal notranslate"><span class="pre">Component</span></code> with dependencies on external ones.</p>
+<p>For instance, suppose that a <code class="docutils literal notranslate"><span class="pre">DataLoaderConfig</span></code> variant has a external child (i.e., a <code class="docutils literal notranslate"><span class="pre">Parameter</span></code> pointing to an external <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataLoaderConfig</span><span class="p">(</span><span class="n">Configuration</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;folder_name&#39;</span><span class="p">,</span>
+                   <span class="n">type_hint</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                   <span class="n">is_required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">external_variant</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;processor&#39;</span><span class="p">,</span>
+                   <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;external&#39;</span><span class="p">)</span>
+
+<span class="nd">@register</span>
+<span class="k">def</span> <span class="nf">register_data_loaders</span><span class="p">():</span>
+    <span class="n">Registry</span><span class="o">.</span><span class="n">add_and_bind</span><span class="p">(</span><span class="n">config_class</span><span class="o">=</span><span class="n">DataLoaderConfig</span><span class="p">,</span>
+                          <span class="n">component_class</span><span class="o">=</span><span class="n">DataLoader</span><span class="p">,</span>
+                          <span class="n">config_constructor</span><span class="o">=</span><span class="n">DataLoaderConfig</span><span class="o">.</span><span class="n">external_variant</span><span class="p">,</span>
+                          <span class="n">name</span><span class="o">=</span><span class="s1">&#39;data_loader&#39;</span><span class="p">,</span>
+                          <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;showcase&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This registration is possible if we tell the <code class="docutils literal notranslate"><span class="pre">Registry</span></code> where to retrieve the <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> with <code class="docutils literal notranslate"><span class="pre">name='processor'</span></code> and <code class="docutils literal notranslate"><span class="pre">namespace='external'</span></code>
+We can do so via <code class="docutils literal notranslate"><span class="pre">Registry.load_registrations()</span></code> to be invoked at the <strong>beginning</strong> of our main script to execute.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">external_directory_path</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">Registry</span><span class="o">.</span><span class="n">load_registrations</span><span class="p">(</span><span class="n">directory_path</span><span class="o">=</span><span class="n">external_directory_path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this way, during the dependency DAG resolution and expansion, the <code class="docutils literal notranslate"><span class="pre">Registry</span></code> searches in <code class="docutils literal notranslate"><span class="pre">external_directory_path</span></code> folder for <code class="docutils literal notranslate"><span class="pre">RegistrationKey</span></code> that are not found locally (i.e., in <code class="docutils literal notranslate"><span class="pre">configurations</span></code> folder).</p>
+</section>
+</section>
+
+
+	    </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="configuration.html" class="btn btn-neutral float-right" title="Configuration">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="registration.html" class="btn btn-neutral" title="Registration APIs"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, Federico Ruggeri.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/jucacrispim/sphinx_pdj_theme">theme</a> provided by <a href="https://poraodojuca.dev">Porão do Juca</a>.
+
+</footer>
+	</div>
+	</div>
+	  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+    <script type="text/javascript" src="_static/documentation_options.js">
+
+    </script>
+    <script type="text/javascript" src="_static/jquery.js">
+
+    </script>
+    <script type="text/javascript" src="_static/underscore.js">
+
+    </script>
+    <script type="text/javascript" src="_static/_sphinx_javascript_frameworks_compat.js">
+
+    </script>
+    <script type="text/javascript" src="_static/doctools.js">
+
+    </script>
+    <script type="text/javascript" src="_static/sphinx_highlight.js">
+
+    </script>
+
+  
+
+   <script type="text/javascript"
+           src="_static/js/theme.js"></script>
+
+   <script type="text/javascript"
+           src="_static/js/pdj.js"></script>
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+  </body>
+</html>
