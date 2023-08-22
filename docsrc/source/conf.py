@@ -6,7 +6,6 @@
 import os
 import sys
 from pathlib import Path
-import sphinx_pdj_theme
 
 sys.path.insert(0, Path(__file__).absolute().parent.parent.parent.as_posix())
 sys.path.insert(0, Path(__file__).absolute().parent.parent.as_posix())
@@ -53,6 +52,7 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+html_title = 'Cinnamon Core'
 html_theme = 'pydata_sphinx_theme'
 # html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 html_static_path = ['_static']
