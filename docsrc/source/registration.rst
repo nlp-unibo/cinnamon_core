@@ -49,6 +49,7 @@ We do so by defining a ``RegistrationKey`` to uniquely access to the ``Configura
     :scale: 60%
     :align: center
 
+
 We register the ``DataLoaderConfig`` as follows:
 
 .. code-block:: python

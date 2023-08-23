@@ -355,12 +355,11 @@ It was developed to offer two main functionalities:</p>
 <dl class="simple">
 <dt><strong>De-coupling</strong></dt><dd><p>a code logic from its regulating parameters</p>
 </dd>
-<dt><strong>Re-use</strong></dt><dd><p>of code logic with effort</p>
+<dt><strong>Re-use</strong></dt><dd><p>of code logic without effort</p>
 </dd>
 </dl>
-</section>
 <section id="background">
-<h1>Background<a class="headerlink" href="#background" title="Permalink to this heading">#</a></h1>
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this heading">#</a></h2>
 <p>Consider a code logic that has to load some data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataLoader</span><span class="p">:</span>
 
@@ -388,6 +387,7 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
 </pre></div>
 </div>
 <p>The main script is modified to load our configuration file so that each code logic is properly initialized.</p>
+</section>
 <section id="cinnamon">
 <h2>Cinnamon<a class="headerlink" href="#cinnamon" title="Permalink to this heading">#</a></h2>
 <p>Well, cinnamon keeps this &lt;configuration, code logic&gt; dichotomy where a configuration is written in <strong>plain Python code</strong>!</p>
@@ -431,9 +431,8 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
 </dl>
 <p><strong>That’s it!</strong> This is all of you need to use cinnamon.</p>
 </section>
-</section>
 <section id="features">
-<h1>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h1>
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h2>
 <dl class="simple">
 <dt><strong>General-purpose</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is meant to <strong>simplify</strong> your code organization for better <strong>re-use</strong>.</p>
 </dd>
@@ -448,6 +447,7 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
 </dl>
 <p><strong>You are still free to code as you like!</strong></p>
 </section>
+</section>
 <section id="install">
 <h1>Install<a class="headerlink" href="#install" title="Permalink to this heading">#</a></h1>
 <dl>
@@ -460,8 +460,20 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
 </div>
 </dd>
 </dl>
+<section id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this heading">#</a></h2>
+<p>Want to contribute with new <code class="docutils literal notranslate"><span class="pre">Component</span></code> and <code class="docutils literal notranslate"><span class="pre">Configuration</span></code>?</p>
+<p>Feel free to submit a merge request!</p>
+<p>Cinnamon is meant to be a community project :)</p>
+</section>
+<section id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Permalink to this heading">#</a></h2>
+<p>Don’t hesitate to contact:
+- <a class="reference external" href="mailto:federico&#46;ruggeri6&#37;&#52;&#48;unibo&#46;it">Federico Ruggeri</a></p>
+<p>for questions/doubts/issues!</p>
 <div class="toctree-wrapper compound">
 </div>
+</section>
 </section>
 
 
@@ -502,13 +514,17 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Cinnamon Core Package</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Cinnamon Core Package</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon">Cinnamon</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#features">Features</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#features">Features</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#install">Install</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#install">Install</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contribute">Contribute</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contact">Contact</a></li>
+</ul>
+</li>
 </ul>
 
   </nav></div>

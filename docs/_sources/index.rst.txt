@@ -13,9 +13,10 @@ It was developed to offer two main functionalities:
    a code logic from its regulating parameters
 
 **Re-use**
-   of code logic with effort
+   of code logic without effort
 
 
+===============================================
 Background
 ===============================================
 
@@ -55,8 +56,9 @@ One common solution is to rely on **configuration files** (e.g., JSON file).
 
 The main script is modified to load our configuration file so that each code logic is properly initialized.
 
+===============================================
 Cinnamon
------------------------------------------------
+===============================================
 
 Well, cinnamon keeps this <configuration, code logic> dichotomy where a configuration is written in **plain Python code**!
 
@@ -109,6 +111,7 @@ To quickly load any instance of our data loader code logic, we
 
 **That's it!** This is all of you need to use cinnamon.
 
+===============================================
 Features
 ===============================================
 
@@ -142,6 +145,25 @@ git
 
       git clone https://github.com/federicoruggeri/cinnamon_core
 
+
+===============================================
+Contribute
+===============================================
+
+Want to contribute with new ``Component`` and ``Configuration``?
+
+Feel free to submit a merge request!
+
+Cinnamon is meant to be a community project :)
+
+===============================================
+Contact
+===============================================
+
+Don't hesitate to contact:
+- `Federico Ruggeri <federico.ruggeri6@unibo.it>`_
+
+for questions/doubts/issues!
 
 .. toctree::
    :maxdepth: 4
