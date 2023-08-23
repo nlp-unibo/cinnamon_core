@@ -6,20 +6,6 @@
 Cinnamon Core Package
 ================================================
 
-Cinnamon is a simple framework for general-purpose configuration and code logic de-coupling.
-It was developed to offer two main functionalities:
-
-**De-coupling**
-   a code logic from its regulating parameters
-
-**Re-use**
-   of code logic without effort
-
-
-===============================================
-Background
-===============================================
-
 Consider a code logic that has to load some data.
 
 .. code-block:: python
@@ -111,26 +97,6 @@ To quickly load any instance of our data loader code logic, we
 
 **That's it!** This is all of you need to use cinnamon.
 
-===============================================
-Features
-===============================================
-
-**General-purpose**
-   ``cinnamon`` is meant to **simplify** your code organization for better **re-use**.
-
-**Simple**
-   ``cinnamon`` is a small library that acts as a **high-level wrapper** for your projects.
-
-**Modular**
-   ``cinnamon`` is shipped in **several small packages** to meet different requirements.
-
-**Community-based**
-   the ``Component`` and ``Configuration`` you define can be **imported from/exported to** other users and project!
-
-**Flexible**
-   ``cinnamon`` imposes **minimal APIs** for a quick learning curve.
-
-**You are still free to code as you like!**
 
 Install
 ===============================================

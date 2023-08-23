@@ -350,16 +350,6 @@ document.write(`
                   
   <section id="cinnamon-core-package">
 <h1>Cinnamon Core Package<a class="headerlink" href="#cinnamon-core-package" title="Permalink to this heading">#</a></h1>
-<p>Cinnamon is a simple framework for general-purpose configuration and code logic de-coupling.
-It was developed to offer two main functionalities:</p>
-<dl class="simple">
-<dt><strong>De-coupling</strong></dt><dd><p>a code logic from its regulating parameters</p>
-</dd>
-<dt><strong>Re-use</strong></dt><dd><p>of code logic without effort</p>
-</dd>
-</dl>
-<section id="background">
-<h2>Background<a class="headerlink" href="#background" title="Permalink to this heading">#</a></h2>
 <p>Consider a code logic that has to load some data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataLoader</span><span class="p">:</span>
 
@@ -387,7 +377,6 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
 </pre></div>
 </div>
 <p>The main script is modified to load our configuration file so that each code logic is properly initialized.</p>
-</section>
 <section id="cinnamon">
 <h2>Cinnamon<a class="headerlink" href="#cinnamon" title="Permalink to this heading">#</a></h2>
 <p>Well, cinnamon keeps this &lt;configuration, code logic&gt; dichotomy where a configuration is written in <strong>plain Python code</strong>!</p>
@@ -430,22 +419,6 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
 </dd>
 </dl>
 <p><strong>That’s it!</strong> This is all of you need to use cinnamon.</p>
-</section>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt><strong>General-purpose</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is meant to <strong>simplify</strong> your code organization for better <strong>re-use</strong>.</p>
-</dd>
-<dt><strong>Simple</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is a small library that acts as a <strong>high-level wrapper</strong> for your projects.</p>
-</dd>
-<dt><strong>Modular</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> is shipped in <strong>several small packages</strong> to meet different requirements.</p>
-</dd>
-<dt><strong>Community-based</strong></dt><dd><p>the <code class="docutils literal notranslate"><span class="pre">Component</span></code> and <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> you define can be <strong>imported from/exported to</strong> other users and project!</p>
-</dd>
-<dt><strong>Flexible</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">cinnamon</span></code> imposes <strong>minimal APIs</strong> for a quick learning curve.</p>
-</dd>
-</dl>
-<p><strong>You are still free to code as you like!</strong></p>
 </section>
 </section>
 <section id="install">
@@ -515,9 +488,7 @@ One common solution is to rely on <strong>configuration files</strong> (e.g., JS
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Cinnamon Core Package</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#background">Background</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon">Cinnamon</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#features">Features</a></li>
 </ul>
 </li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#install">Install</a><ul class="visible nav section-nav flex-column">

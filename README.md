@@ -141,6 +141,15 @@ git
       git clone https://github.com/federicoruggeri/cinnamon_core
 
 
+## Contribute
+
+Want to contribute with new ``Component`` and ``Configuration``?
+
+Feel free to submit a merge request!
+
+Cinnamon is meant to be a community project :)
+
+
 ## Contact
 
 Don't hesitate to contact:
