@@ -258,7 +258,13 @@ class Configuration(FieldDict):
 
         if not self.built:
             self.validate(strict=strict)
-            self.post_build()
+            try:
+                self.post_build()
+            except Exception as e:
+                if strict:
+                    raise e
+                else:
+                    return ValidationResult(passed=False, error_message=str(e))
         return self.validate(strict=strict)
 
     def post_build(
