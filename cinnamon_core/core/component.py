@@ -152,7 +152,7 @@ class Component:
         """
 
         config_copy = self.config.get_delta_copy(params=params_dict)
-        return type(self)(config=config_copy, from_component=True)
+        return type(self)(config=config_copy)
 
     def run(
             self,
