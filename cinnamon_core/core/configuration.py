@@ -385,13 +385,17 @@ class Configuration(FieldDict):
                 for key, value in value_dict.items()}
 
     def show(
-            self
+            self,
+            full: bool = False
     ):
         """
         Displays ``Configuration`` parameters.
+
+        Args:
+            full: if enabled, each parameter's details are displayed.
         """
         logging_utility.logger.info(f'Displaying {self.__class__.__name__} parameters...')
-        parameters_repr = os.linesep.join([param.long_repr() for param_key, param in self.items()])
+        parameters_repr = os.linesep.join([param.long_repr() if full else param.short_repr() for param_key, param in self.items()])
         logging_utility.logger.info(parameters_repr)
 
 

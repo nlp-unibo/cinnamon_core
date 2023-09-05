@@ -82,7 +82,7 @@ class Field:
     def short_repr(
             self
     ) -> str:
-        return f'{self.value}'
+        return f'{self.name}: {self.value}'
 
     def long_repr(
             self
