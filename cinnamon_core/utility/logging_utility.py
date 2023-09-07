@@ -77,10 +77,11 @@ def build_logger(
 
     logger.addHandler(stream_handler)
 
-    file_handler = FileHandler(_logging_path)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    if _logging_path is not None:
+        file_handler = FileHandler(_logging_path)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)

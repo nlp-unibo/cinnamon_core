@@ -170,6 +170,16 @@ class Component:
             self,
             name: str
     ) -> Optional[Any]:
+        """
+        TODO: documentation
+
+        Args:
+            name:
+
+        Returns:
+
+        """
+
         if name in self.config or hasattr(self, name):
             return getattr(self, name)
         else:
@@ -180,6 +190,20 @@ class Component:
                     return child_find
 
         return None
+
+    def clear(
+            self
+    ):
+        """
+        TODO: documentation
+
+        Returns:
+
+        """
+
+        for child_key, child in self.config.children.items():
+            if isinstance(child, core.component.Component):
+                child.clear()
 
     @classmethod
     def build_component_from_key(

@@ -358,9 +358,12 @@ class Configuration(FieldDict):
                          if key.startswith(child_key) else key: value
                          for key, value in copy_dict.items()}
 
-            # No valid case if child is a RegistrationKey -> we avoid an unnecessary registration
-            if copy_dict and isinstance(child.value, core.component.Component):
+            if not copy_dict:
+                continue
+
+            if isinstance(child.value, core.component.Component):
                 copy.get(child_key).value.config = child.value.config.get_delta_copy(params=copy_dict)
+
 
         return copy
 
