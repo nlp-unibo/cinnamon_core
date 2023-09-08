@@ -364,6 +364,10 @@ class Configuration(FieldDict):
             if isinstance(child.value, core.component.Component):
                 copy.get(child_key).value.config = child.value.config.get_delta_copy(params=copy_dict)
 
+            if isinstance(child.value, core.registry.RegistrationKey):
+                raise RuntimeError('Cannot create delta copy version of a child in RegistrationKey format.'
+                                   'This error happens when the provided params contain some parameters of a child'
+                                   'that has not been built to a Component.')
 
         return copy
 
@@ -398,7 +402,8 @@ class Configuration(FieldDict):
             full: if enabled, each parameter's details are displayed.
         """
         logging_utility.logger.info(f'Displaying {self.__class__.__name__} parameters...')
-        parameters_repr = os.linesep.join([param.long_repr() if full else param.short_repr() for param_key, param in self.items()])
+        parameters_repr = os.linesep.join(
+            [param.long_repr() if full else param.short_repr() for param_key, param in self.items()])
         logging_utility.logger.info(parameters_repr)
 
 
