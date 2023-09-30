@@ -171,13 +171,14 @@ class Component:
             name: str
     ) -> Optional[Any]:
         """
-        TODO: documentation
+        Searches for the specified attribute within the Component's configuration.
+        This operation is also extended to the Component's children.
 
         Args:
-            name:
+            name: attribute's name to find.
 
         Returns:
-
+            The attribute's value in case of success. None, otherwise.
         """
 
         if name in self.config or hasattr(self, name):
@@ -195,10 +196,7 @@ class Component:
             self
     ):
         """
-        TODO: documentation
-
-        Returns:
-
+        Resets the Component's internal state.
         """
 
         for child_key, child in self.config.children.items():

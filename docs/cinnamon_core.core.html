@@ -458,11 +458,25 @@ Components generally receive data and produce other data as output: i.e., a data
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="cinnamon_core.core.component.Component.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component.clear" title="Permalink to this definition">#</a></dt>
+<dd><p>Resets the Component’s internal state.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="cinnamon_core.core.component.Component.find">
 <span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.component.Component.find" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+<dd><p>Searches for the specified attribute within the Component’s configuration.
+This operation is also extended to the Component’s children.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – attribute’s name to find.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The attribute’s value in case of success. None, otherwise.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -742,8 +756,13 @@ bounded <code class="docutils literal notranslate"><span class="pre">Component</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cinnamon_core.core.configuration.Configuration.show">
-<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.configuration.Configuration.show" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cinnamon_core.core.configuration.Configuration.show" title="Permalink to this definition">#</a></dt>
 <dd><p>Displays <code class="docutils literal notranslate"><span class="pre">Configuration</span></code> parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>full</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – if enabled, each parameter’s details are displayed.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1831,6 +1850,7 @@ In particular, a <code class="docutils literal notranslate"><span class="pre">Co
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component.build_component"><code class="docutils literal notranslate"><span class="pre">Component.build_component()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component.build_component_from_key"><code class="docutils literal notranslate"><span class="pre">Component.build_component_from_key()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component.clear"><code class="docutils literal notranslate"><span class="pre">Component.clear()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component.find"><code class="docutils literal notranslate"><span class="pre">Component.find()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component.get_delta_copy"><code class="docutils literal notranslate"><span class="pre">Component.get_delta_copy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cinnamon_core.core.component.Component.load"><code class="docutils literal notranslate"><span class="pre">Component.load()</span></code></a></li>
