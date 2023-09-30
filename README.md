@@ -9,6 +9,12 @@ It was developed to offer two main functionalities:
 **Re-use**
    of code logic without effort
 
+## Documentation
+
+Check the online documentation of [cinnamon-core](https://nlp-unibo.github.io/cinnamon_core/) for more information.
+
+Check also the central [cinnamon](https://nlp-unibo.github.io/cinnamon/) documentation to overview all cinnamon packages!
+
 ## Background
 
 Consider a code logic that has to load some data.
