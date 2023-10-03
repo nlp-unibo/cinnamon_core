@@ -16,7 +16,7 @@ with requirements_path.open('r') as f:
 
 setup(
     name='cinnamon_core',
-    version='0.1',
+    version='0.2',
     author='Federico Ruggeri',
     author_email='federico.ruggeri6@unibo.it',
     description='[Core Package] A simple high-level framework for research',
