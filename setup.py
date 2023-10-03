@@ -16,7 +16,7 @@ with requirements_path.open('r') as f:
 
 setup(
     name='cinnamon_core',
-    version='0.2',
+    version='0.2.2',
     author='Federico Ruggeri',
     author_email='federico.ruggeri6@unibo.it',
     description='[Core Package] A simple high-level framework for research',
@@ -31,7 +31,11 @@ setup(
         "Operating System :: OS Independent"
     ],
     license='MIT',
-    packages=['cinnamon_core', 'cinnamon_core.core', 'cinnamon_core.utility'],
+    packages=[
+        'cinnamon_core',
+        'cinnamon_core.core',
+        'cinnamon_core.utility'
+    ],
     install_requires=requirements,
     python_requires=">=3.6"
 )
