@@ -403,7 +403,7 @@ class Configuration(FieldDict):
         """
         logging_utility.logger.info(f'Displaying {self.__class__.__name__} parameters...')
         parameters_repr = os.linesep.join(
-            [param.long_repr() if full else param.short_repr() for param_key, param in self.items()])
+            [f'{param_key}: {param}' for param_key, param in self.to_value_dict().items()])
         logging_utility.logger.info(parameters_repr)
 
 
