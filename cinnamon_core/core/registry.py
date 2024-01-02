@@ -120,7 +120,8 @@ class RegistrationKey:
 
         namespace_condition = lambda other: self.namespace == other.namespace
 
-        tags_non_null_condition = lambda other: self.tags is not None and other.tags is not None
+        tags_non_null_condition = lambda other: (self.tags is not None and len(self.tags)
+                                                 and other.tags is not None and len(other.tags))
         tags_intersection_condition = lambda other: self.tags.intersection(other.tags) == other.tags \
                                                     or self.tags.intersection(other.tags) == self.tags
         tags_null_condition = lambda other: self.tags is None and other.tags is None
