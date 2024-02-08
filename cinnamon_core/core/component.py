@@ -203,6 +203,35 @@ class Component:
             if isinstance(child, core.component.Component):
                 child.clear()
 
+    def get_component_name(
+            self
+    ) -> Optional[str]:
+        return ''
+
+    def get_serialization_name(
+            self
+    ):
+        """
+        Builds the serialization filename used to save the Component's info.
+        """
+
+        serialization_name = []
+        children_name = [child.value.get_serialization_name() for _, child in self.config.children.items() if child.value is not None]
+        children_name = [name for name in children_name if len(name)]
+        children_name = '_'.join(children_name)
+
+        if len(children_name):
+            serialization_name.append(children_name)
+
+        component_name = self.get_component_name()
+        if len(component_name):
+            serialization_name.append(component_name)
+
+        if len(serialization_name):
+            return '_'.join(serialization_name)
+        else:
+            return ''
+
     @classmethod
     def build_component_from_key(
             cls: Type[C],
