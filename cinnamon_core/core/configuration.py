@@ -9,12 +9,51 @@ from typing import Dict, Any, Callable, Optional, TypeVar, Hashable, Type, Itera
 from typeguard import check_type
 
 from cinnamon_core import core
-from cinnamon_core.core.data import FieldDict, Parameter, ValidationFailureException, ValidationResult, F
+from cinnamon_core.core.data import FieldDict, Field, ValidationFailureException, ValidationResult, F
 from cinnamon_core.utility import logging_utility
 from cinnamon_core.utility.python_utility import get_dict_values_combinations
 
 C = TypeVar('C', bound='Configuration')
 Constructor = Callable[[Any], C]
+
+
+class Param(Field):
+    """
+    A ``Field`` extension that is ``Configuration`` specific.
+    """
+
+    def __init__(
+            self,
+            is_child: bool = False,
+            build_type_hint: Optional[Type] = None,
+            variants: Optional[Iterable] = None,
+            **kwargs
+    ):
+        """
+        The ``Parameter`` constructor
+
+        Args:
+            is_child: if True, ``value`` must be a ``RegistrationKey`` instance
+            is_calibration: if True, ``value`` must be a ``RegistrationKey`` instance pointing to a calibration ``Configuration``
+            build_type_hint: the type hint annotation of the built ``Component``
+            variants: set of variant values of ``value`` of interest
+        """
+
+        super().__init__(**kwargs)
+        self.is_child = is_child
+        self.build_type_hint = build_type_hint
+        self.variants = variants
+
+        if is_child:
+            self.tags.add('child')
+
+    def long_repr(
+            self
+    ) -> str:
+        long_repr = super().long_repr()
+        return long_repr + (f'is_child: {self.is_child} --{os.linesep}'
+                            f'build_type_hint: {self.build_type_hint} --{os.linesep}'
+                            f'variants: {self.variants}')
 
 
 class Configuration(FieldDict):
@@ -42,7 +81,7 @@ class Configuration(FieldDict):
             key: Hashable,
             item: Any
     ):
-        if isinstance(item, Parameter):
+        if isinstance(item, Param):
             super().__setitem__(key, item)
         else:
             if key not in self:
@@ -93,19 +132,19 @@ class Configuration(FieldDict):
             build_type_hint: the type hint annotation of the built ``Component``
             variants: set of variant values of ``value`` of interest
         """
-        self[name] = Parameter(name=name,
-                               value=value,
-                               type_hint=type_hint,
-                               description=description,
-                               tags=tags,
-                               allowed_range=allowed_range,
-                               affects_serialization=affects_serialization,
-                               is_required=is_required,
-                               is_child=is_child,
-                               is_calibration=is_calibration,
-                               build_from_registration=build_from_registration,
-                               build_type_hint=build_type_hint,
-                               variants=variants)
+        self[name] = Param(name=name,
+                           value=value,
+                           type_hint=type_hint,
+                           description=description,
+                           tags=tags,
+                           allowed_range=allowed_range,
+                           affects_serialization=affects_serialization,
+                           is_required=is_required,
+                           is_child=is_child,
+                           is_calibration=is_calibration,
+                           build_from_registration=build_from_registration,
+                           build_type_hint=build_type_hint,
+                           variants=variants)
 
         # is_required condition
         if is_required:
@@ -182,7 +221,7 @@ class Configuration(FieldDict):
 
     def get_serialization_parameters(
             self
-    ) -> Dict[str, Parameter]:
+    ) -> Dict[str, Param]:
         """
         Returns the current ``Configuration`` instance parameters that can change the data serialization pipeline
         (i.e., those ``Parameter`` that have ``affects_serialization = True``).
@@ -217,7 +256,8 @@ class Configuration(FieldDict):
                     return key_validation
 
         if 'conditions' not in self:
-            return ValidationResult(passed=True)
+            return ValidationResult(passed=True,
+                                    source=self.__class__.__name__)
 
         for condition_name, condition in self.conditions.items():
             if condition_name.startswith('pre') and self.built:
@@ -227,13 +267,15 @@ class Configuration(FieldDict):
 
             if not condition(self):
                 validation_result = ValidationResult(passed=False,
-                                                     error_message=f'Condition {condition_name} failed!')
+                                                     error_message=f'Condition {condition_name} failed!',
+                                                     source=self.__class__.__name__)
                 if strict:
                     raise ValidationFailureException(validation_result=validation_result)
 
                 return validation_result
 
-        return ValidationResult(passed=True)
+        return ValidationResult(passed=True,
+                                source=self.__class__.__name__)
 
     def fully_validate(
             self,
@@ -264,7 +306,9 @@ class Configuration(FieldDict):
                 if strict:
                     raise e
                 else:
-                    return ValidationResult(passed=False, error_message=str(e))
+                    return ValidationResult(passed=False,
+                                            error_message=str(e),
+                                            source=self.__class__.__name__)
         return self.validate(strict=strict)
 
     def post_build(
@@ -275,9 +319,7 @@ class Configuration(FieldDict):
         bounded ``Component`` instance.
 
         """
-        if not self.built:
-            self.built = True
-        else:
+        if self.built:
             return
 
         for param_key, param in self.items():
@@ -288,15 +330,13 @@ class Configuration(FieldDict):
                 if type(param.value) == core.registry.RegistrationKey:
                     param.value = core.registry.Registry.build_component_from_key(registration_key=param.value)
                 else:
-                    try:
-                        components = []
-                        for key in param.value:
-                            component = core.registry.Registry.build_component_from_key(registration_key=key)
-                            components.append(component)
-                        param.value = components
-                    except TypeError as e:
-                        logging_utility.logger.error(e)
-                        raise e
+                    components = []
+                    for key in param.value:
+                        component = core.registry.Registry.build_component_from_key(registration_key=key)
+                        components.append(component)
+                    param.value = components
+
+        self.built = True
 
     @classmethod
     def get_delta_class_copy(

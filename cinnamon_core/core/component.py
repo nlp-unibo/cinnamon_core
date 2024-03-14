@@ -271,7 +271,7 @@ class Component:
             cls: Type[C],
             name: str,
             namespace: str = 'generic',
-            tags: core.registry.Tag = None,
+            tags: core.registry.Tags = None,
             register_built_component: bool = False,
             build_args: Optional[Dict] = None
     ) -> C:
@@ -334,7 +334,7 @@ class Component:
             cls: Type[C],
             name: str,
             namespace: str = 'generic',
-            tags: core.registry.Tag = None,
+            tags: core.registry.Tags = None,
             is_default: bool = False
     ) -> C:
         """

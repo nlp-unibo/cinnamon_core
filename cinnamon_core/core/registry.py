@@ -13,9 +13,9 @@ from typeguard import check_type
 
 from cinnamon_core.core.component import Component
 from cinnamon_core.core.configuration import Configuration, C
+from cinnamon_core.core.data import Tags
 from cinnamon_core.utility import logging_utility
 
-Tag = Optional[Set[str]]
 Constructor = Callable[[Any], Configuration]
 
 
@@ -31,7 +31,7 @@ class RegistrationKey:
             self,
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
     ):
         """
 
@@ -476,7 +476,7 @@ class Registry:
     def build_component(
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             register_built_component: bool = False,
             build_args: Optional[Dict] = None
     ) -> Component:
@@ -537,7 +537,7 @@ class Registry:
     def retrieve_component(
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
     ) -> Type[Component]:
         """
         Retrieves the ``Component`` class bound to the given ``Configuration`` ``RegistrationKey`` (implicit).
@@ -583,7 +583,7 @@ class Registry:
             component: Component,
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             is_default: bool = False
     ):
         """
@@ -632,7 +632,7 @@ class Registry:
     def retrieve_component_instance(
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             is_default: bool = False
     ) -> Component:
         """
@@ -661,7 +661,7 @@ class Registry:
     def is_in_graph(
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
     ) -> bool:
         key = RegistrationKey(name=name,
                               tags=tags,
@@ -719,7 +719,7 @@ class Registry:
     def build_configuration(
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
     ):
         """
                 Builds a configuration instance given its implicit registration key.
@@ -743,7 +743,7 @@ class Registry:
             config_class: Type[Configuration],
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             is_default: bool = False,
             config_constructor: Optional[Constructor] = None,
             config_kwargs: Optional[Dict] = None,
@@ -821,7 +821,7 @@ class Registry:
             config_class: Type[Configuration],
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             is_default: bool = False,
             config_constructor: Optional[Constructor] = None,
             config_kwargs: Optional[Dict] = None,
@@ -921,7 +921,7 @@ class Registry:
     def retrieve_configurations(
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             exact_match: bool = True,
             strict: bool = True
     ) -> Union[ConfigurationInfo, List[ConfigurationInfo]]:
@@ -983,7 +983,7 @@ class Registry:
             component_class: Type,
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None
+            tags: Tags = None
     ):
         """
         Binds a ``Configuration`` to a ``Component``.
@@ -1008,7 +1008,7 @@ class Registry:
             component_class: Type,
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             is_default: bool = False,
             config_constructor: Optional[Constructor] = None,
             config_kwargs: Optional[Dict] = None
@@ -1052,7 +1052,7 @@ class Registry:
             component_class: Type,
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             is_default: bool = False,
             config_constructor: Optional[Constructor] = None,
             config_kwargs: Optional[Dict] = None,
@@ -1101,7 +1101,7 @@ class Registry:
             component_class: Type[Component],
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             config_constructor: Callable[[Any], Configuration] = None,
             config_kwargs: Optional[Dict] = None,
     ) -> Optional[List[RegistrationKey]]:
@@ -1252,7 +1252,7 @@ class Registry:
             component_class: Type[Component],
             name: str,
             namespace: str = 'generic',
-            tags: Tag = None,
+            tags: Tags = None,
             config_constructor: Callable[[Any], Configuration] = None,
             config_kwargs: Optional[Dict] = None,
     ):
@@ -1425,7 +1425,7 @@ __all__ = [
     'RegistrationKey',
     'register',
     'Registry',
-    'Tag',
+    'Tags',
     'Registration',
     'ConfigurationInfo',
     'NotRegisteredException',
