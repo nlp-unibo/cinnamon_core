@@ -5,7 +5,6 @@ import pytest
 
 from cinnamon_core.core.component import Component
 from cinnamon_core.core.configuration import Configuration, ValidationFailureException
-from cinnamon_core.core.data import OutOfRangeParameterValueException
 from cinnamon_core.core.registry import RegistrationKey, Registry
 
 
@@ -101,8 +100,8 @@ def test_allowed_range_validation():
                description='a parameter')
     config.validate()
 
-    with pytest.raises(OutOfRangeParameterValueException):
-        config.x = 10
+    config.x = 10
+    assert config.validate(strict=False).passed is False
 
 
 def test_variants_validation_exception():
@@ -238,7 +237,7 @@ def test_get_delta_copy():
     assert config.x == 5
     assert type(delta_copy) == Configuration
 
-    other_copy: Configuration = delta_copy.get_delta_copy(params={'x': 15})
+    other_copy: Configuration = delta_copy.get_delta_copy(x=15)
     assert other_copy.x == 15
     assert delta_copy.x == 10
     assert config.x == 5
@@ -246,6 +245,6 @@ def test_get_delta_copy():
 
     other_copy.add(name='y',
                    value=0)
-    assert 'y' not in config
-    assert 'y' not in delta_copy
+    assert 'y' not in config.fields
+    assert 'y' not in delta_copy.fields
     assert other_copy.y == 0

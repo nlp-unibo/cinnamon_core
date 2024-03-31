@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, Optional, Callable, Dict, Type, Set, Union, TypeVar, Iterable
+from typing import Any, Optional, Callable, Dict, Type, Set, Union, TypeVar, List
 
 from typeguard import check_type
 
@@ -99,12 +99,12 @@ class Field:
     def long_repr(
             self
     ) -> str:
-        return (f'name: {self.name} --{os.linesep}'
-                f'value: {self.value} --{os.linesep}'
-                f'type_hint: {self.type_hint} --{os.linesep}'
-                f'description: {self.description} --{os.linesep}'
-                f'tags: {self.tags}--{os.linesep}'
-                f'is_required: {self.is_required} --{os.linesep}')
+        return (f'name: {self.name} {os.linesep}'
+                f'value: {self.value} {os.linesep}'
+                f'type_hint: {self.type_hint} {os.linesep}'
+                f'description: {self.description} {os.linesep}'
+                f'tags: {self.tags} {os.linesep}'
+                f'is_required: {self.is_required} {os.linesep}')
 
     def __str__(
             self
@@ -136,18 +136,31 @@ class Field:
         """
         return self.name == other.name and self.value == other.value
 
-    def in_allowed_range(
-            self
-    ):
-        """
-        Checks if ``Parameter.value`` is in ``Parameter.allowed_range``.
 
-        Raises:
-            ``OutOfRangeParameterValueException``: if ``Parameter.value`` is not in the specified value range.
-        """
+def typing_condition(
+        data: Data,
+        field_name: str,
+        type_hint: Type
+) -> bool:
+    try:
+        found_param = data.get(field_name)
+        check_type(argname=str(found_param.name),
+                   value=found_param.value,
+                   expected_type=type_hint)
+    except TypeError:
+        return False
+    return True
 
-        if self.value is not None and self.allowed_range is not None and not self.allowed_range(self.value):
-            raise OutOfRangeParameterValueException(value=self.value)
+
+def allowed_range_condition(
+        data: Data,
+        field_name: str,
+):
+    found_param = data.get(field_name)
+
+    if found_param.value is not None and not found_param.allowed_range(found_param.value):
+        return False
+    return True
 
 
 class Data:
@@ -164,20 +177,21 @@ class Data:
                 self.add(name=k,
                          value=v)
 
-    def __getattr__(
-            self,
-            name
-    ):
-        if name not in self.__dict__.keys():
-            raise AttributeError(f'Could not find field {name}')
-        return self.__dict__[name].value
-
     def __setattr__(
             self,
             key,
             value
     ):
         self.add(name=key, value=value)
+
+    def __getattribute__(
+            self,
+            name
+    ):
+        attr = object.__getattribute__(self, name)
+        if isinstance(attr, Field):
+            return attr.value
+        return attr
 
     def __str__(
             self
@@ -187,8 +201,8 @@ class Data:
     @property
     def conditions(
             self
-    ) -> Dict[str, Callable[[Data], bool]]:
-        return {key: field.value for key, field in self.__dict__.items() if
+    ) -> Dict[str, Field]:
+        return {key: field for key, field in self.__dict__.items() if
                 isinstance(field, Field) and 'condition' in field.tags}
 
     @property
@@ -218,11 +232,10 @@ class Data:
             default: Any = None
     ) -> Optional[Field]:
         try:
-            return self.__dict__[str(name)]
+            return self.__dict__[name]
         except AttributeError:
             return default
 
-    # TODO: update documentation
     def add(
             self,
             name: str,
@@ -234,7 +247,7 @@ class Data:
             is_required: bool = False,
     ):
         """
-        Adds a ``Field`` to the ``FieldDict`` via its implicit format.
+        Adds a ``Field`` to the ``Data`` via its implicit format.
 
         Args:
             name: unique identifier of the ``Field`` instance
@@ -246,29 +259,26 @@ class Data:
             is_required: if True, ``value`` cannot be None
         """
 
-        self[name] = Field(name=name,
-                           value=value,
-                           type_hint=type_hint,
-                           description=description,
-                           tags=tags,
-                           allowed_range=allowed_range,
-                           is_required=is_required)
+        if name in self.__dict__:
+            field = self.get(name)
+            field.value = field.value if value is None else value
+            field.type_hint = field.type_hint if type_hint is None else type_hint
+            field.description = field.description if description is None else description
+            field.tags = field.tags if tags is None else tags
+            field.allowed_range = field.allowed_range if allowed_range is None else allowed_range
+        else:
+            self.__dict__[name] = Field(name=name,
+                                        value=value,
+                                        type_hint=type_hint,
+                                        description=description,
+                                        tags=tags,
+                                        allowed_range=allowed_range,
+                                        is_required=is_required)
 
-        def typing_condition(
-                data: Data,
-                field_name: str,
-                type_hint: Type
-        ) -> bool:
-            try:
-                found_param = data.get(field_name)
-                check_type(argname=str(found_param.name),
-                           value=found_param.value,
-                           expected_type=type_hint)
-            except TypeError:
-                return False
-            return True
+        if is_required:
+            self.add_condition(name=f'{name}_is_required',
+                               condition=lambda data: data.get(name) is not None)
 
-        # add type_hint condition
         if type_hint is not None:
             self.add_condition(name=f'{name}_typecheck',
                                condition=lambda data: partial(typing_condition,
@@ -276,6 +286,13 @@ class Data:
                                                               type_hint=type_hint)(data),
                                description=f'Checks if {name} if of type {type_hint}.',
                                tags={'typechecking'})
+
+        if allowed_range is not None:
+            self.add_condition(name=f'{name}_allowed_range',
+                               condition=lambda data: partial(allowed_range_condition,
+                                                              field_name=name)(data),
+                               description=f'Checks if {name} is in allowed range.',
+                               tags={'allowed_range'})
 
     def add_condition(
             self,
@@ -301,13 +318,12 @@ class Data:
                  description=description,
                  tags=tags)
 
-    # TODO: update documentation
     def validate(
             self,
             strict: bool = True
     ) -> ValidationResult:
         """
-        Calls all stage-related conditions to assess the correctness of the current ``FieldDict``.
+        Calls all stage-related conditions to assess the correctness of the current ``Data``.
 
         Args:
             strict: if True, a failed validation process will raise ``InvalidConfigurationException``
@@ -326,7 +342,7 @@ class Data:
                 return child_validation
 
         for condition_name, condition in self.conditions.items():
-            if not condition(self):
+            if not condition.value(self):
                 validation_result = ValidationResult(passed=False,
                                                      error_message=f'Condition {condition_name} failed!',
                                                      source=self.__class__.__name__)
@@ -338,8 +354,7 @@ class Data:
         return ValidationResult(passed=True,
                                 source=self.__class__.__name__)
 
-    # TODO: update documentation
-    def search_by_tag(
+    def search_field_by_tag(
             self,
             tags: Union[Tags, str],
             exact_match: bool = True
@@ -360,19 +375,55 @@ class Data:
         return {key: field.value for key, field in self.fields.items()
                 if (exact_match and field.tags == tags) or (not exact_match and field.tags.intersection(tags) == tags)}
 
-    # TODO: update documentation
-    def search(
+    def search_field(
             self,
-            conditions: Iterable[Callable[[Field], bool]]
+            conditions: List[Callable[[Field], bool]]
     ) -> Dict[str, Any]:
         """
         Performs a custom ``Field`` search by given conditions.
 
         Args:
-            conditions:
+            conditions: list of callable filter functions
 
         Returns:
             A dictionary with ``Field.name`` as keys and ``Field`` as values
         """
         return {key: field.value for key, field in self.fields.items()
+                if all([condition(field) for condition in conditions])}
+
+    def search_condition_by_tag(
+            self,
+            tags: Union[Tags, str],
+            exact_match: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Searches for all ``Field`` that match specified tags set.
+
+        Args:
+            tags: a set of string tags to look for
+            exact_match: if True, only the ``Field`` with ``Field.tags`` that exactly match ``tags`` will be returned
+
+        Returns:
+            A dictionary with ``Field.name`` as keys and ``Field`` as values
+        """
+        if not type(tags) == set:
+            tags = {tags}
+
+        return {key: field.value for key, field in self.conditions.items()
+                if (exact_match and field.tags == tags) or (not exact_match and field.tags.intersection(tags) == tags)}
+
+    def search_condition(
+            self,
+            conditions: List[Callable[[Field], bool]]
+    ) -> Dict[str, Any]:
+        """
+        Performs a custom search on available ``Field`` conditions by given conditions.
+
+        Args:
+            conditions: list of callable filter functions
+
+        Returns:
+            A dictionary with ``Field.name`` as keys and ``Field`` as values
+        """
+        return {key: field.value for key, field in self.conditions.items()
                 if all([condition(field) for condition in conditions])}
