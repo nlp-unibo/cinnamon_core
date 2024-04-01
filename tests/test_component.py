@@ -3,7 +3,6 @@ import pytest
 from cinnamon_core.core.component import Component
 from cinnamon_core.core.configuration import Configuration
 from cinnamon_core.core.registry import Registry
-from pathlib import Path
 
 
 @pytest.fixture
@@ -47,7 +46,7 @@ def test_delta_copy(
 
     component.config.add(name='x',
                          value=5)
-    assert 'x' not in delta_copy.config
+    assert 'x' not in delta_copy.config.fields
     assert component.x == 5
 
 
@@ -58,71 +57,9 @@ def test_find():
 
     parent = Component(config=Configuration())
     parent.config.add(name='x', value=5)
-    parent.config.add(name='child', value=Component(Configuration({'y': 10})))
+    parent.config.add(name='child', value=Component(Configuration(y=10)), is_child=True)
 
     assert parent.x == 5
     assert parent.config.child.y == 10
     assert parent.find(name='x') == 5
     assert parent.find(name='y') == 10
-
-
-def test_save_and_load():
-    """
-    Testing component.save() and component.load().
-    The component has a flat configuration (i.e., no children)
-    """
-
-    config = Configuration()
-    config.add(name='x', value=5)
-    config.add(name='y', value='some string')
-
-    component = Component(config=config)
-    serialization_path = Path('.').resolve()
-    component.save(serialization_path=serialization_path)
-
-    component_path = serialization_path.joinpath(component.__class__.__name__)
-    assert component_path.exists()
-
-    component.x = 10
-    assert component.x == 10
-
-    component.load(serialization_path=serialization_path)
-    assert component.x == 5
-    assert component.y == 'some string'
-
-    component_path.unlink()
-
-
-def test_save_and_load_nested():
-    """
-    Testing component.save() and component.load().
-    The component has a non-flat configuration (i.e., at least one child)
-    """
-
-    config = Configuration()
-    config.add(name='x', value=5)
-
-    child_config = Configuration()
-    child_config.add(name='y', value='some string')
-    child = Component(config=child_config)
-
-    config.add(name='child', value=child, is_child=True)
-    component = Component(config=config, from_component=True)
-
-    serialization_path = Path('.').resolve()
-    component.save(serialization_path=serialization_path)
-
-    component_path = serialization_path.joinpath(component.__class__.__name__)
-    assert component_path.exists()
-
-    child_path = component_path.with_name(f'{component_path.name}_child')
-    assert child_path.exists()
-
-    config.child.y = 'other string'
-    assert config.child.y == 'other string'
-
-    component.load(serialization_path=serialization_path)
-    assert config.child.y == 'some string'
-
-    component_path.unlink()
-    child_path.unlink()

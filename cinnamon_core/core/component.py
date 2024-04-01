@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import AnyStr, Any, Iterable, Optional, Dict, Union, TypeVar, Type, cast
+from typing import Any, Iterable, Optional, Dict, TypeVar, Type, cast
 
 from typeguard import check_type
 
 from cinnamon_core import core
 from cinnamon_core.core.configuration import Configuration
-from cinnamon_core.utility.pickle_utility import save_pickle, load_pickle
 
 C = TypeVar('C', bound='Component')
+
+__all__ = ['Component', 'C']
 
 
 class Component:
@@ -36,20 +36,18 @@ class Component:
     ):
         if item == 'config':
             raise AttributeError()
-        if item in self.__dict__:
-            return super().__getattr__(item)
-        if item in self.config:
-            return self.config[item]
+        if item in self.config.fields:
+            return self.config.values[item]
         else:
-            raise AttributeError(f'{self.__class__.__name__} has no attribute {item}')
+            return object.__getattribute__(self, item)
 
     def __setattr__(
             self,
             key,
             value
     ):
-        if hasattr(self, 'config') and key in self.config:
-            self.config[key] = value
+        if hasattr(self, 'config') and key in self.config.fields:
+            self.config.add(name=key, value=value)
         else:
             super().__setattr__(key, value)
 
@@ -58,117 +56,25 @@ class Component:
     ) -> Iterable[str]:
         return list(super().__dir__()) + list(self.config.__dir__())
 
-    # The father component calls its child save with its associated name
-    def save(
-            self,
-            serialization_path: Optional[Union[AnyStr, Path]] = None,
-            name: Optional[str] = None
-    ):
-        """
-        Saves ``Component`` internal state in Pickle format.
-        The ``Component``'s state is its internal Python dictionary state, accessible via ``Component.state`` wrapper.
-
-        Args:
-            serialization_path: Path where to save the ``Component`` state.
-            name: if the component is a child in another component configuration, ``name`` is the parameter key
-            used by the parent to reference the child. Otherwise, ``name`` is automatically set to the component class
-            name.
-        """
-
-        if serialization_path is None:
-            return
-
-        serialization_path = Path(serialization_path) if type(serialization_path) != Path else serialization_path
-        name = name if name is not None else self.__class__.__name__
-
-        # Call save() for children as well
-        for param_key, param in self.config.children.items():
-            if isinstance(param.value, Component):
-                param.value.save(serialization_path=serialization_path,
-                                 name=f'{name}_{param_key}')
-
-        if serialization_path is not None:
-            component_path = serialization_path.joinpath(name)
-            data = self.prepare_save_data()
-            save_pickle(filepath=component_path,
-                        data=data)
-
-    def prepare_save_data(
-            self
-    ) -> Dict:
-        return {key: value for key, value in self.config.items() if not isinstance(value, Component)}
-
-    # The father component calls its child save with its associated name
-    def load(
-            self,
-            serialization_path: Optional[Union[AnyStr, Path]] = None,
-            name: Optional[str] = None
-    ):
-        """
-        Loads ``Component``'s internal state from serialized Pickle file.
-
-        Args:
-            serialization_path: Path where to load the ``Component``'s state.
-            name: if the component is a child in another component configuration, ``name`` is the parameter key
-            used by the parent to reference the child. Otherwise, ``name`` is automatically set to the component class
-            name.
-        """
-
-        if serialization_path is None:
-            return
-
-        serialization_path = Path(serialization_path) if type(serialization_path) != Path else serialization_path
-        name = name if name is not None else self.__class__.__name__
-
-        # Call load() for children as well
-        for param_key, param in self.config.children.items():
-            if isinstance(param.value, Component):
-                param.value.load(serialization_path=serialization_path,
-                                 name=f'{name}_{param_key}')
-
-        if serialization_path is not None:
-            component_path = serialization_path.joinpath(name)
-            loaded_state: Dict = load_pickle(filepath=component_path)
-            for key, value in loaded_state.items():
-                if key in self.config:
-                    self.config[key] = value
-                elif hasattr(self, key):
-                    setattr(self, key, value)
-
     def get_delta_copy(
             self: Type[C],
-            params_dict: Optional[Dict[str, Any]] = None
+            **kwargs
     ) -> C:
         """
         Builds a ``Component`` deepcopy where its ``Configuration`` differs from the original one by the specified
         parameters' value.
 
-        Args:
-            params_dict: a dictionary where keys are the ``Configurations``'s parameters' name and values are the new
-            values to update.
-
         Returns:
             A ``Component``'s delta copy based on specified new parameters' value.
         """
 
-        config_copy = self.config.get_delta_copy(params=params_dict)
+        config_copy = self.config.get_delta_copy(**kwargs)
         return type(self)(config=config_copy)
-
-    def run(
-            self,
-            *args,
-            **kwargs
-    ) -> Any:
-        """
-        General execution entry point of ``Component``.
-        The recommended way of subclassing ``Component`` is to define the ``Component``'s logic in this method.
-        This general interface allows general-purpose ``Component`` stacking.
-        """
-        pass
 
     def find(
             self,
-            name: str
+            name: str,
+            default: Any = None
     ) -> Optional[Any]:
         """
         Searches for the specified attribute within the Component's configuration.
@@ -176,21 +82,21 @@ class Component:
 
         Args:
             name: attribute's name to find.
+            default: default value if attribute is not found
 
         Returns:
             The attribute's value in case of success. None, otherwise.
         """
 
-        if name in self.config or hasattr(self, name):
+        if name in self.config.fields or hasattr(self, name):
             return getattr(self, name)
         else:
-            children = [param.value for param_key, param in self.config.items() if isinstance(param.value, Component)]
-            for child in children:
-                child_find = child.find(name=name)
+            for child_name, child in self.config.children.items():
+                child_find = child.value.find(name=name, default=None)
                 if child_find is not None:
                     return child_find
 
-        return None
+        return default
 
     def clear(
             self
@@ -198,39 +104,14 @@ class Component:
         """
         Resets the Component's internal state.
         """
-
         for child_key, child in self.config.children.items():
-            if isinstance(child, core.component.Component):
-                child.clear()
+            child.clear()
 
-    def get_component_name(
+    @property
+    def name(
             self
     ) -> Optional[str]:
         return ''
-
-    def get_serialization_name(
-            self
-    ):
-        """
-        Builds the serialization filename used to save the Component's info.
-        """
-
-        serialization_name = []
-        children_name = [child.value.get_serialization_name() for _, child in self.config.children.items() if child.value is not None]
-        children_name = [name for name in children_name if len(name)]
-        children_name = '_'.join(children_name)
-
-        if len(children_name):
-            serialization_name.append(children_name)
-
-        component_name = self.get_component_name()
-        if len(component_name):
-            serialization_name.append(component_name)
-
-        if len(serialization_name):
-            return '_'.join(serialization_name)
-        else:
-            return ''
 
     @classmethod
     def build_component_from_key(
@@ -358,6 +239,3 @@ class Component:
         check_type('component', component, cls)
         component = cast(type(cls), component)
         return component
-
-
-__all__ = ['Component', 'C']

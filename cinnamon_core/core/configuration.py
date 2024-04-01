@@ -3,17 +3,20 @@ from __future__ import annotations
 import os
 from copy import deepcopy
 from functools import partial
-from typing import Dict, Any, Callable, Optional, TypeVar, Type, Iterable, List, Set, Union
+from typing import Dict, Any, Callable, Optional, TypeVar, Type, Iterable, List, Set
+
+from pandas import json_normalize
 
 from cinnamon_core import core
 from cinnamon_core.core.data import Data, Field, ValidationFailureException, ValidationResult, F, typing_condition, \
     allowed_range_condition
 from cinnamon_core.utility import logging_utility
 from cinnamon_core.utility.python_utility import get_dict_values_combinations
-from pandas import json_normalize
 
 C = TypeVar('C', bound='Configuration')
 Constructor = Callable[[Any], C]
+
+__all__ = ['Configuration', 'ValidationFailureException', 'C']
 
 
 class Param(Field):
@@ -335,7 +338,7 @@ class Configuration(Data):
             if isinstance(child, core.component.Component):
                 value_dict.update(child.config.to_value_dict())
 
-        return json_normalize(value_dict)
+        return json_normalize(value_dict, sep='.').to_dict()
 
     def get_variants_combinations(
             self,
@@ -377,6 +380,3 @@ class Configuration(Data):
         parameters_repr = os.linesep.join(
             [f'{key}: {value}' for key, value in self.to_value_dict().items()])
         logging_utility.logger.info(parameters_repr)
-
-
-__all__ = ['Configuration', 'ValidationFailureException', 'C']
