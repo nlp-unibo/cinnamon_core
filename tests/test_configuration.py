@@ -248,3 +248,21 @@ def test_get_delta_copy():
     assert 'y' not in config.fields
     assert 'y' not in delta_copy.fields
     assert other_copy.y == 0
+
+
+def test_to_value_dict():
+    config = Configuration()
+    config.add(name='x',
+               value=10,
+               type_hint=int,
+               description='a parameter')
+    config.add(name='child',
+               value=RegistrationKey(name='component',
+                                     namespace='testing'),
+               build_type_hint=str,
+               is_child=True)
+    config.post_build()
+    config.child.config.add(name='y',
+                            value=5)
+    value_dict = config.to_value_dict()
+    assert value_dict == {'x': 10, 'y': 5}
