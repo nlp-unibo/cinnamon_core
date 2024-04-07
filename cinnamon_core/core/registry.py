@@ -5,7 +5,7 @@ import importlib.util
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Type, AnyStr, List, Set, Dict, Any, Union, Optional, Callable
+from typing import Type, AnyStr, List, Dict, Any, Union, Optional, Callable
 
 import networkx as nx
 from pyvis.network import Network
@@ -17,6 +17,22 @@ from cinnamon_core.core.data import Tags
 from cinnamon_core.utility import logging_utility
 
 Constructor = Callable[[Any], Configuration]
+
+__all__ = [
+    'RegistrationKey',
+    'register',
+    'Registry',
+    'Tags',
+    'Registration',
+    'ConfigurationInfo',
+    'NotRegisteredException',
+    'NotBoundException',
+    'AlreadyRegisteredException',
+    'InvalidConfigurationTypeException',
+    'AlreadyBoundException',
+    'DisconnectedGraphException',
+    'NotADAGException'
+]
 
 
 class RegistrationKey:
@@ -30,7 +46,7 @@ class RegistrationKey:
     def __init__(
             self,
             name: str,
-            namespace: str = 'generic',
+            namespace: str = 'default',
             tags: Tags = None,
     ):
         """
@@ -62,15 +78,15 @@ class RegistrationKey:
     def __str__(
             self
     ) -> str:
-        to_return = f'name{self.KEY_VALUE_SEPARATOR}{self.name}'
+        to_return = [f'name{self.KEY_VALUE_SEPARATOR}{self.name}']
 
         if self.tags is not None:
             tags = sorted(list(self.tags)) if self.tags else None
             if tags is not None:
-                to_return += f'{self.ATTRIBUTE_SEPARATOR}tags{self.KEY_VALUE_SEPARATOR}{tags}'
+                to_return.append(f'{self.ATTRIBUTE_SEPARATOR}tags{self.KEY_VALUE_SEPARATOR}{tags}')
 
-        to_return += f'{self.ATTRIBUTE_SEPARATOR}namespace{self.KEY_VALUE_SEPARATOR}{self.namespace}'
-        return to_return
+        to_return.append(f'{self.ATTRIBUTE_SEPARATOR}namespace{self.KEY_VALUE_SEPARATOR}{self.namespace}')
+        return ''.join(to_return)
 
     def __repr__(
             self
@@ -1201,7 +1217,8 @@ class Registry:
 
             if built_config.get(child_name).variants is not None and child_key is not None:
                 Registry.DEPENDENCY_DAG.nodes[child_key]['variants'] = [str(key)
-                                                                        for key in built_config.get(child_name).variants]
+                                                                        for key in
+                                                                        built_config.get(child_name).variants]
 
         # Register each combination of parameter variants
         parameter_combinations = built_config.get_variants_combinations()
@@ -1419,20 +1436,3 @@ class Registry:
             }
         """)
         g.show('dependencies.html')
-
-
-__all__ = [
-    'RegistrationKey',
-    'register',
-    'Registry',
-    'Tags',
-    'Registration',
-    'ConfigurationInfo',
-    'NotRegisteredException',
-    'NotBoundException',
-    'AlreadyRegisteredException',
-    'InvalidConfigurationTypeException',
-    'AlreadyBoundException',
-    'DisconnectedGraphException',
-    'NotADAGException'
-]

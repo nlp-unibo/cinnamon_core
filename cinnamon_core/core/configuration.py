@@ -264,7 +264,7 @@ class Configuration(Data):
     @classmethod
     def get_delta_class_copy(
             cls: type[C],
-            constructor: Optional[Callable[[Any], Configuration]] = None,
+            constructor: Optional[Callable[[Any], C]] = None,
             constructor_kwargs: Optional[Dict] = None,
             **kwargs
     ) -> C:
@@ -333,12 +333,12 @@ class Configuration(Data):
     def to_value_dict(
             self
     ):
-        value_dict = {}
+        value_dict = {key: field.value for key, field in self.fields.items() if key != 'built' and not field.is_child}
         for child_name, child in self.children.items():
-            if isinstance(child, core.component.Component):
-                value_dict.update(child.config.to_value_dict())
+            if isinstance(child.value, core.component.Component):
+                value_dict.update(child.value.config.to_value_dict())
 
-        return json_normalize(value_dict, sep='.').to_dict()
+        return json_normalize(value_dict, sep='.').to_dict(orient='records')[0]
 
     def get_variants_combinations(
             self,

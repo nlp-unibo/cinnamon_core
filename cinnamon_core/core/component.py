@@ -151,7 +151,7 @@ class Component:
     def build_component(
             cls: Type[C],
             name: str,
-            namespace: str = 'generic',
+            namespace: str = 'default',
             tags: core.registry.Tags = None,
             register_built_component: bool = False,
             build_args: Optional[Dict] = None
@@ -214,7 +214,7 @@ class Component:
     def retrieve_component_instance(
             cls: Type[C],
             name: str,
-            namespace: str = 'generic',
+            namespace: str = 'default',
             tags: core.registry.Tags = None,
             is_default: bool = False
     ) -> C:
