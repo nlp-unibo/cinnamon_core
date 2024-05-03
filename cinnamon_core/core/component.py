@@ -36,7 +36,7 @@ class Component:
     ):
         if item == 'config':
             raise AttributeError()
-        if item in self.config.fields:
+        if item in self.config.params:
             return self.config.values[item]
         else:
             return object.__getattribute__(self, item)
@@ -46,7 +46,7 @@ class Component:
             key,
             value
     ):
-        if hasattr(self, 'config') and key in self.config.fields:
+        if hasattr(self, 'config') and key in self.config.params:
             self.config.add(name=key, value=value)
         else:
             super().__setattr__(key, value)
@@ -88,7 +88,7 @@ class Component:
             The attribute's value in case of success. None, otherwise.
         """
 
-        if name in self.config.fields or hasattr(self, name):
+        if name in self.config.params or hasattr(self, name):
             return getattr(self, name)
         else:
             for child_name, child in self.config.children.items():

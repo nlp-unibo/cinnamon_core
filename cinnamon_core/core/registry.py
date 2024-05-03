@@ -12,8 +12,7 @@ from pyvis.network import Network
 from typeguard import check_type
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration, C
-from cinnamon_core.core.data import Tags
+from cinnamon_core.core.configuration import Configuration, C, Tags
 from cinnamon_core.utility import logging_utility
 
 Constructor = Callable[[Any], Configuration]
@@ -22,7 +21,6 @@ __all__ = [
     'RegistrationKey',
     'register',
     'Registry',
-    'Tags',
     'Registration',
     'ConfigurationInfo',
     'NotRegisteredException',

@@ -4,8 +4,132 @@ from typing import List
 import pytest
 
 from cinnamon_core.core.component import Component
-from cinnamon_core.core.configuration import Configuration, ValidationFailureException
+from cinnamon_core.core.configuration import Configuration, ValidationFailureException, Param
 from cinnamon_core.core.registry import RegistrationKey, Registry
+
+
+def test_adding_param():
+    """
+    Testing config.add() function
+    """
+
+    config = Configuration()
+    config.add(name='x',
+               value=50,
+               type_hint=int,
+               description="test description")
+    assert config.x == 50
+    assert config.get('x').value == 50
+    assert type(config.get('x')) == Param
+
+
+def test_init_from_kwargs():
+    """
+    Testing that a data can be initialized from a python dictionary
+    """
+
+    config = Configuration(x=50)
+    assert config.x == 50
+    assert config.get('x').value == 50
+    assert type(config.get('x')) == Param
+
+
+def test_typecheck():
+    """
+    Testing that typecheck condition fails when setting a param to a new value with different type
+    """
+
+    config = Configuration()
+    config.add(name='x',
+               value=50,
+               type_hint=int,
+               description="test description")
+    config.x = 'invalid_integer'
+    with pytest.raises(ValidationFailureException):
+        config.validate()
+
+
+def test_add_condition():
+    """
+    Testing config.add_condition() function
+    """
+
+    config = Configuration()
+    config.add(name='x',
+               value=[1, 2, 3],
+               type_hint=List[int],
+               description="test description")
+    config.add(name='y',
+               value=[2, 2, 2],
+               type_hint=List[int],
+               description="test description")
+    config.add_condition(condition=lambda c: len(c.x) == len(c.y),
+                         name='x_y_pairing')
+    config.validate()
+
+    with pytest.raises(ValidationFailureException):
+        config.x.append(5)
+        config.validate()
+
+
+def test_copy():
+    """
+    Testing that a Config can be deep copied
+    """
+
+    config = Configuration()
+    config.add(name='x',
+               value=[1, 2, 3])
+    config.add(name='y',
+               value=Configuration(z=5))
+    copy = deepcopy(config)
+    copy.x.append(5)
+
+    assert config.x == [1, 2, 3]
+    assert copy.x == [1, 2, 3, 5]
+
+    copy.y.z = 10
+    assert config.y.z == 5
+    assert copy.y.z == 10
+
+
+def test_search_by_tag():
+    config = Configuration()
+    config.add(name='x',
+               value=5,
+               tags={'number'})
+    config.add(name='y',
+               value=10,
+               tags={'number'})
+    config.add(name='z',
+               value='z',
+               tags={'letter'})
+
+    result = config.search_param_by_tag(tags={'number'})
+    assert 'x' in result
+    assert 'y' in result
+    assert type(result['x'] == int)
+    assert type(result['y'] == int)
+
+
+def test_search():
+    config = Configuration()
+    config.add(name='x',
+               value=5,
+               tags={'number'})
+    config.add(name='y',
+               value=10,
+               tags={'number'})
+    config.add(name='z',
+               value='z',
+               tags={'letter'})
+
+    result = config.search_param(conditions=[
+        lambda param: 'number' in param.tags
+    ])
+    assert 'y' in result
+    assert type(result['x'] == int)
+    assert type(result['y'] == int)
 
 
 @pytest.fixture
@@ -245,8 +369,8 @@ def test_get_delta_copy():
 
     other_copy.add(name='y',
                    value=0)
-    assert 'y' not in config.fields
-    assert 'y' not in delta_copy.fields
+    assert 'y' not in config.params
+    assert 'y' not in delta_copy.params
     assert other_copy.y == 0
 
 

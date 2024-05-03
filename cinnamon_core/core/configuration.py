@@ -2,63 +2,202 @@ from __future__ import annotations
 
 import os
 from copy import deepcopy
+from dataclasses import dataclass
 from functools import partial
-from typing import Dict, Any, Callable, Optional, TypeVar, Type, Iterable, List, Set
+from typing import Dict, Any, Callable, Optional, TypeVar, Type, Iterable, List, Set, Union
 
 from pandas import json_normalize
+from typeguard import check_type
 
 from cinnamon_core import core
-from cinnamon_core.core.data import Data, Field, ValidationFailureException, ValidationResult, F, typing_condition, \
-    allowed_range_condition
 from cinnamon_core.utility import logging_utility
 from cinnamon_core.utility.python_utility import get_dict_values_combinations
 
 C = TypeVar('C', bound='Configuration')
+P = TypeVar('P', bound='Param')
+
 Constructor = Callable[[Any], C]
+Tags = Optional[Set[str]]
 
-__all__ = ['Configuration', 'ValidationFailureException', 'C']
+__all__ = [
+    'Configuration',
+    'ValidationFailureException',
+    'C',
+    'P',
+    'Tags'
+]
 
 
-class Param(Field):
+class OutOfRangeParameterValueException(Exception):
+
+    def __init__(self, value):
+        super().__init__(f'Parameter value {value} not in allowed range')
+
+
+class InconsistentTypeException(Exception):
+
+    def __init__(self, expected_type, given_type):
+        super().__init__(f'Expected parameter value with type {expected_type} but got {given_type}')
+
+
+@dataclass
+class ValidationResult:
     """
-    A ``Field`` extension that is ``Configuration`` specific.
+    Utility dataclass to store conditions evaluation result (see ``Configuration.validate()``).
+
+    Args:
+        passed: True if all conditions are True
+        error_message: a string message reporting which condition failed during the evaluation process.
+    """
+
+    passed: bool
+    source: str
+    error_message: Optional[str] = None
+
+
+class ValidationFailureException(Exception):
+
+    def __init__(
+            self,
+            validation_result: ValidationResult
+    ):
+        super().__init__(f'Source: {validation_result.source}{os.linesep}'
+                         f'The validation process has failed!{os.linesep}'
+                         f'Passed: {validation_result.passed}{os.linesep}'
+                         f'Error message: {validation_result.error_message}')
+
+
+class Param:
+    """
+    A generic attribute wrapper that allows
+    - type annotation
+    - textual description metadata
+    - tags metadata for categorization and general-purpose retrieval
     """
 
     def __init__(
             self,
+            name: str,
+            value: Any = None,
+            type_hint: Optional[Type] = None,
+            description: Optional[str] = None,
+            tags: Tags = None,
+            allowed_range: Optional[Callable[[Any], bool]] = None,
+            is_required: bool = False,
             is_child: bool = False,
             build_type_hint: Optional[Type] = None,
             variants: Optional[Iterable] = None,
-            **kwargs
     ):
         """
         The ``Parameter`` constructor
 
         Args:
+            name: unique identifier of the ``Field`` instance
+            value: the wrapped value of the ``Field`` instance
+            type_hint: type annotation concerning ``value``
+            description: a string description of the ``Field`` for readability purposes
+            tags: a set of string tags to mark the ``Field`` instance with metadata.
+            allowed_range: allowed range of values for ``value``
+            is_required: if True, ``value`` cannot be None
             is_child: if True, ``value`` must be a ``RegistrationKey`` instance
             is_calibration: if True, ``value`` must be a ``RegistrationKey`` instance pointing to a calibration ``Configuration``
             build_type_hint: the type hint annotation of the built ``Component``
             variants: set of variant values of ``value`` of interest
         """
 
-        super().__init__(**kwargs)
+        self.name = name
+        self.value = value
+        self.type_hint = type_hint
+        self.description = description
+        self.tags = set(tags) if tags is not None else set()
+        self.allowed_range = allowed_range
+        self.is_required = is_required
         self.is_child = is_child
         self.build_type_hint = build_type_hint
         self.variants = variants
 
+        if is_required:
+            self.tags.add('required')
+
         if is_child:
             self.tags.add('child')
+
+    def short_repr(
+            self
+    ) -> str:
+        return f'{self.name}: {self.value}'
 
     def long_repr(
             self
     ) -> str:
-        long_repr = super().long_repr()
-        return long_repr + (f'is_child: {self.is_child} {os.linesep}'
-                            f'build_type_hint: {self.build_type_hint} {os.linesep}'
-                            f'variants: {self.variants}')
+        return (f'name: {self.name} {os.linesep}'
+                f'value: {self.value} {os.linesep}'
+                f'type_hint: {self.type_hint} {os.linesep}'
+                f'description: {self.description} {os.linesep}'
+                f'tags: {self.tags} {os.linesep}'
+                f'is_required: {self.is_required} {os.linesep}'
+                f'is_child: {self.is_child} {os.linesep}'
+                f'build_type_hint: {self.build_type_hint} {os.linesep}'
+                f'variants: {self.variants}')
+
+    def __str__(
+            self
+    ) -> str:
+        return self.short_repr()
+
+    def __repr__(
+            self
+    ) -> str:
+        return self.short_repr()
+
+    def __hash__(
+            self
+    ) -> int:
+        return hash(str(self))
+
+    def __eq__(
+            self,
+            other: type[P]
+    ) -> bool:
+        """
+        Two ``Param`` instances are equal iff they have the same name and value.
+
+        Args:
+            other: another ``Param`` instance
+
+        Returns:
+            True if the two ``Param`` instances are equal.
+        """
+        return self.name == other.name and self.value == other.value
 
 
-class Configuration(Data):
+def typing_condition(
+        data: Configuration,
+        name: str,
+        type_hint: Type
+) -> bool:
+    try:
+        found_param = data.get(name)
+        check_type(argname=str(found_param.name),
+                   value=found_param.value,
+                   expected_type=type_hint)
+    except TypeError:
+        return False
+    return True
+
+
+def allowed_range_condition(
+        data: Configuration,
+        name: str,
+):
+    found_param = data.get(name)
+
+    if found_param.value is not None and not found_param.allowed_range(found_param.value):
+        return False
+    return True
+
+
+class Configuration:
     """
     Generic Configuration class.
     A Configuration specifies the parameters of a Component.
@@ -71,18 +210,74 @@ class Configuration(Data):
             self,
             **kwargs
     ):
-        super().__init__(**kwargs)
+        if kwargs:
+            for k, v in kwargs.items():
+                self.add(name=k,
+                         value=v)
+
         self.add(name='built',
                  value=False,
                  type_hint=bool,
                  is_required=True,
-                 description="Internal status field that is True when post_build() is invoked, False otherwise.")
+                 description="Internal status attribute that is True when post_build() is invoked, False otherwise.")
+
+    def __setattr__(
+            self,
+            key,
+            value
+    ):
+        self.add(name=key, value=value)
+
+    def __getattribute__(
+            self,
+            name
+    ):
+        attr = object.__getattribute__(self, name)
+        if isinstance(attr, Param):
+            return attr.value
+        return attr
+
+    def __str__(
+            self
+    ) -> str:
+        return str(self.to_value_dict())
+
+    @property
+    def conditions(
+            self
+    ) -> Dict[str, P]:
+        return {key: param for key, param in self.__dict__.items() if
+                isinstance(param, Param) and 'condition' in param.tags}
+
+    @property
+    def params(
+            self
+    ) -> Dict[str, P]:
+        return {key: param for key, param in self.__dict__.items()
+                if isinstance(param, Param) and 'condition' not in param.tags}
+
+    @property
+    def values(
+            self
+    ) -> Dict[str, Any]:
+        return {key: param.value for key, param in self.__dict__.items()
+                if isinstance(param, Param) and 'condition' not in param.tags}
 
     @property
     def children(
             self
-    ) -> Dict[str, F]:
+    ) -> Dict[str, P]:
         return {param_key: param for param_key, param in self.__dict__.items() if param.is_child}
+
+    def get(
+            self,
+            name: str,
+            default: Any = None
+    ) -> Optional[P]:
+        try:
+            return self.__dict__[name]
+        except AttributeError:
+            return default
 
     def add(
             self,
@@ -144,7 +339,7 @@ class Configuration(Data):
         if type_hint is not None:
             self.add_condition(name=f'{name}_typecheck',
                                condition=lambda config: partial(typing_condition,
-                                                                field_name=name,
+                                                                name=name,
                                                                 type_hint=type_hint)(config),
                                description=f'Checks if {name} if of type {type_hint}.',
                                tags={'typechecking', 'pre-built'})
@@ -160,7 +355,7 @@ class Configuration(Data):
         if allowed_range is not None:
             self.add_condition(name=f'{name}_allowed_range',
                                condition=lambda config: partial(allowed_range_condition,
-                                                                field_name=name)(config),
+                                                                name=name)(config),
                                description=f'Checks if {name} is in allowed range.',
                                tags={'allowed_range'})
 
@@ -169,6 +364,30 @@ class Configuration(Data):
                                condition=lambda p: len(p.get(name).variants) > 0,
                                description='Check if variants is not an empty set',
                                tags={'variants'})
+
+    def add_condition(
+            self,
+            condition: Callable[[Configuration], bool],
+            name: str,
+            description: Optional[str] = None,
+            tags: Tags = None,
+    ):
+        """
+        Adds a condition to be validated.
+
+        Args:
+            condition: a function that receives as input the current ``Data`` instance and returns a boolean.
+            name: unique identifier.
+            description: a string description for readability purposes.
+            tags: a set of string tags to mark the condition with metadata.
+        """
+
+        tags = set() if tags is None else tags
+        tags.add('condition')
+        self.add(name=name,
+                 value=condition,
+                 description=description,
+                 tags=tags)
 
     def validate(
             self,
@@ -195,8 +414,8 @@ class Configuration(Data):
                     return child_validation
 
         for condition_name, condition in self.search_condition(conditions=[
-            lambda field: 'condition' in field.tags,
-            lambda field: f'{"pre" if self.built else "post"}' not in field.tags
+            lambda param: 'condition' in param.tags,
+            lambda param: f'{"pre" if self.built else "post"}' not in param.tags
         ]).items():
             if not condition(self):
                 validation_result = ValidationResult(passed=False,
@@ -298,7 +517,7 @@ class Configuration(Data):
 
         found_keys = []
         for key, value in kwargs.items():
-            if key in self.fields:
+            if key in self.params:
                 copy.get(key).value = deepcopy(value)
                 found_keys.append(key)
 
@@ -333,7 +552,7 @@ class Configuration(Data):
     def to_value_dict(
             self
     ):
-        value_dict = {key: field.value for key, field in self.fields.items() if key != 'built' and not field.is_child}
+        value_dict = {key: param.value for key, param in self.params.items() if key != 'built' and not param.is_child}
         for child_name, child in self.children.items():
             if isinstance(child.value, core.component.Component):
                 value_dict.update(child.value.config.to_value_dict())
@@ -348,7 +567,7 @@ class Configuration(Data):
         Gets all possible ``Configuration`` variant combinations of current ``Configuration``
         instance based on specified variants.
         There exist two different methods to specify variants
-        - ``Parameter``-based: via ``variants`` field of ``Parameter``
+        - ``Parameter``-based: via ``variants`` attribute of ``Parameter``
         - ``Configuration``-based: via ``@supports_variants`` and ``@add_variant`` decorators
 
         Args:
@@ -380,3 +599,77 @@ class Configuration(Data):
         parameters_repr = os.linesep.join(
             [f'{key}: {value}' for key, value in self.to_value_dict().items()])
         logging_utility.logger.info(parameters_repr)
+
+    def search_param_by_tag(
+            self,
+            tags: Union[Tags, str],
+            exact_match: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Searches for all ``Param`` that match specified tags set.
+
+        Args:
+            tags: a set of string tags to look for
+            exact_match: if True, only the ``Param`` with ``Param.tags`` that exactly match ``tags`` will be returned
+
+        Returns:
+            A dictionary with ``Param.name`` as keys and ``Param`` as values
+        """
+        if not type(tags) == set:
+            tags = {tags}
+
+        return {key: param.value for key, param in self.params.items()
+                if (exact_match and param.tags == tags) or (not exact_match and param.tags.intersection(tags) == tags)}
+
+    def search_param(
+            self,
+            conditions: List[Callable[[P], bool]]
+    ) -> Dict[str, Any]:
+        """
+        Performs a custom ``Param`` search by given conditions.
+
+        Args:
+            conditions: list of callable filter functions
+
+        Returns:
+            A dictionary with ``Param.name`` as keys and ``Param`` as values
+        """
+        return {key: param.value for key, param in self.params.items()
+                if all([condition(param) for condition in conditions])}
+
+    def search_condition_by_tag(
+            self,
+            tags: Union[Tags, str],
+            exact_match: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Searches for all ``Param`` that match specified tags set.
+
+        Args:
+            tags: a set of string tags to look for
+            exact_match: if True, only the ``Param`` with ``Param.tags`` that exactly match ``tags`` will be returned
+
+        Returns:
+            A dictionary with ``Param.name`` as keys and ``Param`` as values
+        """
+        if not type(tags) == set:
+            tags = {tags}
+
+        return {key: param.value for key, param in self.conditions.items()
+                if (exact_match and param.tags == tags) or (not exact_match and param.tags.intersection(tags) == tags)}
+
+    def search_condition(
+            self,
+            conditions: List[Callable[[P], bool]]
+    ) -> Dict[str, Any]:
+        """
+        Performs a custom search on available ``Param`` conditions by given conditions.
+
+        Args:
+            conditions: list of callable filter functions
+
+        Returns:
+            A dictionary with ``Param.name`` as keys and ``Param`` as values
+        """
+        return {key: param.value for key, param in self.conditions.items()
+                if all([condition(param) for condition in conditions])}

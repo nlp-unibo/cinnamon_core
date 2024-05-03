@@ -46,7 +46,7 @@ def test_delta_copy(
 
     component.config.add(name='x',
                          value=5)
-    assert 'x' not in delta_copy.config.fields
+    assert 'x' not in delta_copy.config.params
     assert component.x == 5
 
 
